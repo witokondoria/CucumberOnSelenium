@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Suite1" verbose="10" parallel="instances"
+	thread-count="10">
+	<listeners>
+		<listener class-name="es.bull.framework.cucumber.testng.ExecutiveResultsReporter" />
+		<listener class-name="es.bull.framework.cucumber.testng.TestSkipperListener" />
+	</listeners>
+	<test name="cucumber-selenium">
+		<packages>
+			<package name="es.rtve" />
+		</packages>
+	</test>
+</suite>
