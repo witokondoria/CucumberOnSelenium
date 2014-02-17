@@ -1,4 +1,4 @@
-package es.bull.framework;
+package es.bull.testingframework;
 
 import java.util.Properties;
 

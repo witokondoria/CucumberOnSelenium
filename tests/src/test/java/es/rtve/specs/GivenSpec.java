@@ -1,7 +1,7 @@
 package es.rtve.specs;
 
 import cucumber.api.java.es.Dado;
-import es.bull.framework.specs.CommonSpec;
+import es.bull.testingframework.specs.CommonSpec;
 
 public class GivenSpec{
 
@@ -11,9 +11,9 @@ public class GivenSpec{
 		this.commonspec = spec;
 	}
 	
-	@Dado("^que navego a \"(.+?)\"$")
-	public void browseTo(String url) {
-		commonspec.getLogger().info("{}: Browsing to {}", commonspec.getShortBrowser(), url);
-		commonspec.getDriver().get(url);
+	@Dado("^que cierro el navegador$")
+	public void runApp(String url) {
+		commonspec.getLogger().info("{}: Closing browser", commonspec.getShortBrowser());
+		commonspec.getDriver().quit();
 	}
 }

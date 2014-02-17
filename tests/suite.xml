@@ -2,8 +2,10 @@
 <suite name="Suite1" verbose="10" parallel="instances"
 	thread-count="10">
 	<listeners>
-		<listener class-name="es.bull.framework.cucumber.testng.ExecutiveResultsReporter" />
-		<listener class-name="es.bull.framework.cucumber.testng.TestSkipperListener" />
+		<listener
+			class-name="es.bull.testingframework.cucumber.testng.ExecutiveResultsReporter" />
+		<listener
+			class-name="es.bull.testingframework.cucumber.testng.TestSkipperListener" />
 	</listeners>
 	<test name="cucumber-selenium">
 		<packages>

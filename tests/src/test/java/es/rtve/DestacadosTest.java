@@ -4,9 +4,9 @@ import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
 import cucumber.api.CucumberOptions;
-import es.bull.framework.cucumber.testng.CucumberRunner;
-import es.bull.framework.data.SelectableDataProvider;
-import es.bull.framework.BaseTest;
+import es.bull.testingframework.BaseTest;
+import es.bull.testingframework.cucumber.testng.CucumberRunner;
+import es.bull.testingframework.data.SelectableDataProvider;
 
 @CucumberOptions(features = { "src/test/resources/es/rtve/destacados.feature" })
 public class DestacadosTest extends BaseTest {

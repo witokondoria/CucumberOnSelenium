@@ -1,5 +1,6 @@
-package es.bull.framework.cucumber.testng;
+package es.bull.testingframework.cucumber.testng;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,8 +28,9 @@ public class ExecutiveResultsReporter extends TestListenerAdapter {
 			InputStream template = classLoader
 					.getResourceAsStream("dashboard_header.html");
 
-			FileOutputStream fos = new FileOutputStream(
-					"target/executions/dashboard.html", true);
+			File fout = new File("target/executions/dashboard.html");
+			fout.getParentFile().mkdirs();
+			FileOutputStream fos = new FileOutputStream(fout, true);
 
 			int len = 0;
 			byte[] buffer = new byte[1024];

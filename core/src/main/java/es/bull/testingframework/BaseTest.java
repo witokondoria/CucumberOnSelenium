@@ -1,12 +1,12 @@
-package es.bull.framework;
+package es.bull.testingframework;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterClass;
 
 abstract public class BaseTest{
 
@@ -33,5 +33,6 @@ abstract public class BaseTest{
 	@BeforeMethod
 	public void beforeMethod(Method method) {
 		ThreadProperty.set("browser", this.browser);
+		//TODO: parallel execution and priorization based on grid status
 	}
 }

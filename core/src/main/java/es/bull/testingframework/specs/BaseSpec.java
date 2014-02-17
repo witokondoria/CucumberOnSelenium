@@ -1,4 +1,4 @@
-package es.bull.framework.specs;
+package es.bull.testingframework.specs;
 
 public class BaseSpec {
 

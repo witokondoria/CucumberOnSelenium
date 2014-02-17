@@ -4,8 +4,8 @@
 	<parent>
 		<groupId>es.bull.testingframework</groupId>
 		<artifactId>cucumberOnSelenium</artifactId>
-		<version>1</version>
+		<version>1</version>		
 	</parent>
 	<artifactId>core</artifactId>
-	<packaging>jar</packaging>
+	<packaging>jar</packaging>	
 </project>

@@ -1,4 +1,4 @@
-package es.bull.framework.cucumber.testng;
+package es.bull.testingframework.cucumber.testng;
 
 import cucumber.runtime.CucumberException;
 import cucumber.runtime.io.URLOutputStream;
@@ -19,7 +19,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import es.bull.framework.ThreadProperty;
+import es.bull.testingframework.ThreadProperty;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -265,15 +265,19 @@ class CucumberReporter implements Formatter, Reporter {
 			addStepAndResultListing(stringBuilder);
 			Result skipped = null;
 			Result failed = null;
+			Result passedWithWarn = null;
 			steps.get(iteration);
 			for (Result result : results) {
 				if ("failed".equals(result.getStatus())) {
 					failed = result;
-				}
-				if ("undefined".equals(result.getStatus())
+				} else if ("undefined".equals(result.getStatus())
 						|| "pending".equals(result.getStatus())) {
 					skipped = result;
+				} else if ((result.getError() != null)
+						&& "passed".equals(result.getStatus())) {
+					passedWithWarn = result;
 				}
+
 			}
 			for (Result result : hooks) {
 				if (failed == null && "failed".equals(result.getStatus())) {
@@ -300,6 +304,22 @@ class CucumberReporter implements Formatter, Reporter {
 				} else {
 					element.setAttribute("status", "SKIP");
 				}
+			} else if (passedWithWarn != null) {
+				element.setAttribute("status", "PASS");
+				element.setAttribute("warn", "TRUE");
+				for (Result result : results) {
+					StringWriter stringWriter = new StringWriter();
+					if ((result.getError() != null)
+							&& "passed".equals(result.getStatus())) {
+						result.getError().printStackTrace(
+								new PrintWriter(stringWriter));
+						Element exception = createException(doc, result
+								.getError().getClass().getName(),
+								stringBuilder.toString(),
+								stringWriter.toString());
+						element.appendChild(exception);
+					}
+				}
 			} else {
 				element.setAttribute("status", "PASS");
 			}
@@ -308,7 +328,7 @@ class CucumberReporter implements Formatter, Reporter {
 			results.addScenarioResult(ThreadProperty.get("class"),
 					feature.getName(), ThreadProperty.get("browser"),
 					ThreadProperty.get("dataSet"),
-					element.getAttribute("status"));
+					element.getAttribute("status"), element.getAttribute("warn"));
 		}
 
 		private String calculateTotalDurationString() {
@@ -344,15 +364,18 @@ class CucumberReporter implements Formatter, Reporter {
 			for (int i = 0; i < simplifiedSteps.size(); i++) {
 				int length = sb.length();
 				String resultStatus = "not executed";
+				String resultStatusWarn = "*";
 				if (i < simplifiedResults.size()) {
 					resultStatus = simplifiedResults.get(i).getStatus();
+					resultStatusWarn = (simplifiedResults.get(i).getError() != null) ? "*"
+							: "";
 				}
 				sb.append(simplifiedSteps.get(i).getKeyword());
 				sb.append(simplifiedSteps.get(i).getName());
 				do {
 					sb.append(".");
 				} while (sb.length() - length < 106);
-				sb.append(resultStatus);
+				sb.append(resultStatus + resultStatusWarn);
 				sb.append("\n");
 			}
 		}

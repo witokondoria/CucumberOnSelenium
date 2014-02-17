@@ -1,19 +1,18 @@
-package es.bull.framework.cucumber.testng;
-
-import cucumber.api.CucumberOptions;
-import cucumber.runtime.ClassFinder;
-import cucumber.runtime.CucumberException;
-import cucumber.runtime.RuntimeOptions;
-import cucumber.runtime.RuntimeOptionsFactory;
-import cucumber.runtime.io.MultiLoader;
-import cucumber.runtime.io.ResourceLoader;
-import cucumber.runtime.io.ResourceLoaderClassFinder;
-import cucumber.runtime.Utils;
+package es.bull.testingframework.cucumber.testng;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import cucumber.api.CucumberOptions;
+import cucumber.runtime.ClassFinder;
+import cucumber.runtime.RuntimeOptions;
+import cucumber.runtime.RuntimeOptionsFactory;
+import cucumber.runtime.Utils;
+import cucumber.runtime.io.MultiLoader;
+import cucumber.runtime.io.ResourceLoader;
+import cucumber.runtime.io.ResourceLoaderClassFinder;
 
 public class CucumberRunner {
 
@@ -29,13 +28,14 @@ public class CucumberRunner {
 
 		List<String> uniqueGlue = new ArrayList<String>();
 		uniqueGlue.add("classpath:es/rtve/specs");
+		uniqueGlue.add("classpath:es/bull/testingframework/specs");
 		runtimeOptions.getGlue().clear();
 		runtimeOptions.getGlue().addAll(uniqueGlue);
 
 		new File("target/executions/").mkdirs();
 		CucumberReporter reporter = new CucumberReporter(
-				Utils.toURL("target/executions/" + clazz.getCanonicalName() + "-"
-						+ browser + ".xml"), clazz.getCanonicalName());
+				Utils.toURL("target/executions/" + clazz.getCanonicalName()
+						+ "-" + browser + ".xml"), clazz.getCanonicalName());
 		runtimeOptions.getFormatters().add(reporter);
 		ClassFinder classFinder = new ResourceLoaderClassFinder(resourceLoader,
 				classLoader);
@@ -45,12 +45,5 @@ public class CucumberRunner {
 
 	public void runCukes() throws IOException {
 		runtime.run();
-
-		if (!runtime.getErrors().isEmpty()) {
-			for (Throwable th : runtime.getErrors()) {
-				th.printStackTrace();
-			}
-			throw new CucumberException(runtime.getErrors().get(0));
-		}
 	}
 }

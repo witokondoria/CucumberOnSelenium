@@ -6,14 +6,16 @@
 		<artifactId>cucumberOnSelenium</artifactId>
 		<version>1</version>
 	</parent>
+	<groupId>es.rtve</groupId>
 	<artifactId>tests</artifactId>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>aspectj-maven-plugin</artifactId>
-				<version>1.5</version>
+				<version>1.6</version>
 				<configuration>
+					<id>compile</id>
 					<source>1.7</source>
 					<complianceLevel>1.7</complianceLevel>
 					<verbose>true</verbose>
@@ -21,18 +23,20 @@
 					<outxml>true</outxml>
 					<aspectLibraries>
 						<aspectLibrary>
-							<groupId>org.aspectj</groupId>
-							<artifactId>aspectjrt</artifactId>
+							<groupId>es.bull.testingframework</groupId>
+							<artifactId>core</artifactId>
 						</aspectLibrary>
 					</aspectLibraries>
-					<sources>
-						<source>
-							<basedir>src/test/java</basedir>
-							<includes>
-								<include>**/*.java</include>
-							</includes>
-						</source>
-					</sources>
+					<weaveDependencies>
+						<weaveDependency>
+							<groupId>info.cukes</groupId>
+							<artifactId>cucumber-core</artifactId>
+						</weaveDependency>
+						<weaveDependency>
+							<groupId>es.bull.testingframework</groupId>
+							<artifactId>core</artifactId>
+						</weaveDependency>
+					</weaveDependencies>
 				</configuration>
 				<executions>
 					<execution>
@@ -68,12 +72,7 @@
 			<groupId>es.bull.testingframework</groupId>
 			<artifactId>core</artifactId>
 			<version>1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>info.cukes</groupId>
-			<artifactId>cucumber-picocontainer</artifactId>
-			<version>1.1.6-SNAPSHOT</version>
+ 			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

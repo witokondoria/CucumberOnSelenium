@@ -1,16 +1,26 @@
 package es.rtve.specs;
 
+import static es.bull.testingframework.matchers.MatcherAssert.assertWarnThat;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
+import static org.testng.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import cucumber.api.Transform;
 import cucumber.api.java.es.Entonces;
-import es.bull.framework.specs.BaseSpec;
-import es.bull.framework.specs.CommonSpec;
+import es.bull.testingframework.cucumber.converter.ArrayListConverter;
+import es.bull.testingframework.specs.BaseSpec;
+import es.bull.testingframework.specs.CommonSpec;
 
 public class ThenSpec extends BaseSpec {
 
@@ -20,7 +30,6 @@ public class ThenSpec extends BaseSpec {
 
 	@Entonces("^la pestaña \"(.*?)\" debe tener un color distinto de gris$")
 	public void assertTabNotGrey(String tabTitle) {
-
 		WebElement tab = commonspec.getDriver().findElement(
 				By.xpath("//li/a[@title='" + tabTitle + "']"));
 		commonspec.getLogger().info("{}: Verifying tab {} isn't greyed",
@@ -55,5 +64,60 @@ public class ThenSpec extends BaseSpec {
 
 		assertThat(tag + " tag with bad id", commonspec.getDriver()
 				.findElement(By.tagName(tag)).getAttribute("id"), equalTo(id));
+	}
+
+	@Entonces("^existe al menos un elemento con \"(.*?)\" \"(.*?)\"$")
+	public void assertContainerExists(String attrib, String value) {
+		List<WebElement> elems = null;
+
+		commonspec.getLogger().info("{}: Verifying container existance",
+				commonspec.getShortBrowser());
+
+		switch (attrib) {
+		case "id":
+			elems = commonspec.getDriver().findElements(By.id(value));
+			break;
+		case "name":
+			elems = commonspec.getDriver().findElements(By.name(value));
+			break;
+		default:
+			fail("Unimplemented locator method");
+			break;
+		}
+
+		assertThat("No elements found with expected " + attrib + ": " + value,
+				elems.size(), greaterThan(0));
+		commonspec.setCurrentElements(elems);
+	}
+
+	@Entonces("^el primero de ellos no contiene elementos con clase \"(.*?)\"$")
+	public void assertValidContent(
+			@Transform(ArrayListConverter.class) ArrayList<String> invalidContent) {
+
+		commonspec.getLogger().info("{}: Verifying valid content",
+				commonspec.getShortBrowser());
+
+		WebElement firstContent = commonspec.getCurrentElements().get(1);
+		ArrayList<String> children = new ArrayList<String>();
+		for (String element : invalidContent) {
+			if (firstContent.findElements(By.className(element)).size() > 0) {
+				children.add(element);
+			}
+		}
+
+		assertThat("Invalid content at element", children,
+				not(hasItems(invalidContent.toArray(new String[invalidContent
+						.size()]))));
+	}
+
+	@Entonces("^si existe mas de uno, \"(.+?)\" habrá que generar un aviso$")
+	public void warnOnMoreThanOneElement(String doWarn) {
+		if (doWarn.toLowerCase().equals("si")) {
+			commonspec.getLogger().info(
+					"{}: Warn if theres more than one element",
+					commonspec.getShortBrowser());
+			assertWarnThat("More than one element found", commonspec
+					.getCurrentElements().size(), equalTo(1));
+		}
 	}
 }

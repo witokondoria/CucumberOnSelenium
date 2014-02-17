@@ -1,13 +1,13 @@
-package es.bull.framework.cucumber.testng;
+package es.bull.testingframework.cucumber.testng;
 
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
 import org.testng.ITestResult;
 import org.testng.SkipException;
 
-import es.bull.framework.BaseTest;
+import es.bull.testingframework.BaseTest;
 
-public class TestSkipperListener implements IHookable {
+public class TestSkipperListener implements IHookable{
 
 	@Override
 	public void run(IHookCallBack callback, ITestResult testResult) {
@@ -19,5 +19,4 @@ public class TestSkipperListener implements IHookable {
 			throw new SkipException("Skipped test due config");
 		}
 	}
-
 }

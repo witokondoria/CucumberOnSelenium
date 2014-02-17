@@ -35,10 +35,19 @@
 				width: 850,
 				height: 600,
 				afterLoad: function(current, previous) {					
-					$("iframe.fancybox-iframe").contents().find("#side-panel").hide()
-					$("iframe.fancybox-iframe").contents().find("#header").hide()
-					$("iframe.fancybox-iframe").contents().find("#footer").hide()
-				}
+					$("iframe.fancybox-iframe").contents().find("#side-panel").hide();
+					$("iframe.fancybox-iframe").contents().find("#header").hide();
+					$("iframe.fancybox-iframe").contents().find("#footer").hide();					
+				},
+				afterShow: function() {
+					console.log($("iframe.fancybox-iframe").contents().find("#map"));
+					$("iframe.fancybox-iframe").contents().find("#map").find("area").bind("click", function(e) {
+						e.preventDefault();
+					}
+					$("iframe.fancybox-iframe").contents().find("#map").find("a").bind("click", function(e) {
+						e.preventDefault();
+					}
+				},	
 			});
 	 
             $("#results tr.results > td:not(.feature)").click(function(){

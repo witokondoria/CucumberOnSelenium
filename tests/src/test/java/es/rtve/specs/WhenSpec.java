@@ -4,8 +4,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import cucumber.api.java.es.Cuando;
-import es.bull.framework.specs.BaseSpec;
-import es.bull.framework.specs.CommonSpec;
+import es.bull.testingframework.specs.BaseSpec;
+import es.bull.testingframework.specs.CommonSpec;
 
 public class WhenSpec extends BaseSpec {
 

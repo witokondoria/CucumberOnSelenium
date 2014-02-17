@@ -1,4 +1,4 @@
-package es.rtve.specs;
+package es.bull.testingframework.specs;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,14 +15,14 @@ import com.thoughtworks.selenium.SeleniumException;
 
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
-import es.bull.framework.ThreadProperty;
-import es.bull.framework.specs.CommonSpec;
+import es.bull.testingframework.ThreadProperty;
+import es.bull.testingframework.specs.CommonSpec;
 
-public class HookSpec {
+public class HookGSpec {
 
 	private CommonSpec commonspec;
 
-	public HookSpec(CommonSpec spec) {
+	public HookGSpec(CommonSpec spec) {
 		this.commonspec = spec;
 	}
 
@@ -69,12 +69,13 @@ public class HookSpec {
 
 		commonspec.setDriver(new RemoteWebDriver(new URL(hub), capabilities));
 		commonspec.getDriver().manage().timeouts()
-				.pageLoadTimeout(40, TimeUnit.SECONDS);
+				.pageLoadTimeout(60, TimeUnit.SECONDS);
 		commonspec.getDriver().manage().timeouts()
 				.implicitlyWait(10, TimeUnit.SECONDS);
 		commonspec.getDriver().manage().timeouts()
 				.setScriptTimeout(30, TimeUnit.SECONDS);
 
+		//FIXME: shamefully hardcoded
 		commonspec.getDriver().manage().window()
 				.setSize(new Dimension(1366, 768));
 

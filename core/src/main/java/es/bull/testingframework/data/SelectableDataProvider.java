@@ -1,4 +1,4 @@
-package es.bull.framework.data;
+package es.bull.testingframework.data;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;

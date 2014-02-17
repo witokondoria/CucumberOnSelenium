@@ -1,4 +1,4 @@
-package es.bull.framework.specs;
+package es.bull.testingframework.specs;
 
 import ij.ImagePlus;
 import ij.io.FileSaver;
@@ -7,6 +7,7 @@ import ij.process.ImageProcessor;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -18,12 +19,12 @@ import org.openqa.selenium.internal.Locatable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import es.bull.framework.ThreadProperty;
+import es.bull.testingframework.ThreadProperty;
 
 public class CommonSpec {
 
 	private WebDriver driver;
-	private WebElement currentElement;
+	private List<WebElement> currentElements;
 	private String browser;
 	private String shortBrowser;
 	private final Logger logger = LoggerFactory.getLogger(ThreadProperty
@@ -57,12 +58,12 @@ public class CommonSpec {
 		this.shortBrowser = shortBrowser;
 	}
 
-	public WebElement getCurrentElement() {
-		return currentElement;
+	public List<WebElement> getCurrentElements() {
+		return currentElements;
 	}
 
-	public void setCurrentElement(WebElement currentElement) {
-		this.currentElement = currentElement;
+	public void setCurrentElements(List<WebElement> currentElements) {
+		this.currentElements = currentElements;
 	}
 
 	public Double capsCompare(String pestanya, BufferedImage capture,

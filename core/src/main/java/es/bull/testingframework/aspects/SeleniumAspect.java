@@ -1,4 +1,4 @@
-package es.bull.framework.aspects;
+package es.bull.testingframework.aspects;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,15 +14,15 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import es.bull.framework.ThreadProperty;
-import es.bull.framework.specs.BaseSpec;
+import es.bull.testingframework.ThreadProperty;
+import es.bull.testingframework.specs.BaseSpec;
 
 @Aspect
 public class SeleniumAspect {
 
-	@Pointcut("call(static public void org.hamcrest.MatcherAssert.assert*(..))"
-			+ " || call(* org.openqa.selenium.*.findElement(..))"
-			+ " || call(* org.openqa.selenium.*.findElements(..))")
+	@Pointcut("call(static public void org.hamcrest.MatcherAssert.assertThat(..))"
+			+ " || call(* org.openqa.selenium.*.click(..))"
+			+ " || call(* org.openqa.selenium.*.findElement(..))")
 	protected void exceptionCallPointcut() {
 	}
 

@@ -1,4 +1,4 @@
-package es.bull.framework.cucumber.testng;
+package es.bull.testingframework.cucumber.testng;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,9 +32,9 @@ public class ResultsBackend {
 	}
 
 	public void addScenarioResult(String clazz, String feature, String browser,
-			String data, String executionResult) {
+			String data, String executionResult, String warn) {
 		ScenarioResult result = new ScenarioResult(clazz, feature, browser,
-				data, executionResult);
+				data, executionResult, warn);
 		sResult.add(result);
 	}
 
@@ -103,7 +103,8 @@ public class ResultsBackend {
 		return response;
 	}
 
-	public String getExecutionResults(String clazz, String data, String browser, String feature) {
+	public String getExecutionResults(String clazz, String data,
+			String browser, String feature) {
 
 		String response = "-";
 		String BUILD_URL = System.getenv().get("BUILD_URL");
@@ -112,12 +113,24 @@ public class ResultsBackend {
 			if (result.getBrowser().equals(browser)
 					&& result.getData().equals(data)
 					&& result.getClazz().equals(clazz)) {
-				response = "<a href='" + BUILD_URL + "/testngreports/" + clazz.substring(0, clazz.lastIndexOf(".")) + "/"
-						+ clazz + "/" + feature + " " + data + " " + browser + "' class='fancybox fancybox.iframe' >";
-				if (result.getExecutionResult().equals("PASS")) {
-					response = response + "<img alt='Passed test' src='/userContent/OK.png'/></a>";
-				} else if (result.getExecutionResult().equals("FAIL")) {
-					response = response + "<img alt='Failed test' src='/userContent/KO.png'/></a>";
+				response = "<a href='" + BUILD_URL + "/testngreports/"
+						+ clazz.substring(0, clazz.lastIndexOf(".")) + "/"
+						+ clazz + "/" + feature + " " + data + " " + browser
+						+ "' class='fancybox fancybox.iframe' >";
+
+				if (result.getWarn().equals("TRUE")) {
+					if (result.getExecutionResult().equals("PASS")) {
+						response = response
+								+ "<img alt='Passed test' src='/userContent/OKW.png'/></a>";
+					} 
+				} else {
+					if (result.getExecutionResult().equals("PASS")) {
+						response = response
+								+ "<img alt='Passed test' src='/userContent/OK.png'/></a>";
+					} else if (result.getExecutionResult().equals("FAIL")) {
+						response = response
+								+ "<img alt='Failed test' src='/userContent/KO.png'/></a>";
+					}
 				}
 			}
 		}
@@ -158,14 +171,16 @@ public class ResultsBackend {
 		private String browser;
 		private String data;
 		private String executionResult;
+		private String warn;
 
 		public ScenarioResult(String clazz, String feature, String browser,
-				String data, String executionResult) {
+				String data, String executionResult, String warn) {
 			this.setClazz(clazz);
 			this.setFeature(feature);
 			this.setBrowser(browser);
 			this.setData(data);
 			this.setExecutionResult(executionResult);
+			this.setWarn(warn);
 		}
 
 		public String getClazz() {
@@ -206,6 +221,14 @@ public class ResultsBackend {
 
 		public void setExecutionResult(String executionResult) {
 			this.executionResult = executionResult;
+		}
+
+		public String getWarn() {
+			return warn;
+		}
+
+		public void setWarn(String warn) {
+			this.warn = warn;
 		}
 	}
 }
