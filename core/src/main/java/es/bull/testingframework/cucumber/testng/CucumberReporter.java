@@ -104,10 +104,9 @@ class CucumberReporter implements Formatter, Reporter {
 
 	@Override
 	public void startOfScenarioLifeCycle(Scenario scenario) {
-
 		root = document.createElement("test-method");
 		clazz.appendChild(root);
-		testMethod.start(root, iteration);
+		testMethod.start(root, iteration);	
 		iteration++;
 	}
 
@@ -222,8 +221,11 @@ class CucumberReporter implements Formatter, Reporter {
 		long totalDuration = 0;
 		for (int i = 0; i < testCaseNodes.getLength(); i++) {
 			try {
-				String duration = testCaseNodes.item(i).getAttributes()
-						.getNamedItem("duration-ms").getNodeValue();
+				String duration = "0";
+				Node durationms = testCaseNodes.item(i).getAttributes().getNamedItem("duration-ms");
+				if (durationms != null) {
+					duration = durationms.getNodeValue();
+				}
 				totalDuration += Long.parseLong(duration);
 			} catch (NumberFormatException e) {
 				throw new CucumberException(e);
@@ -244,6 +246,9 @@ class CucumberReporter implements Formatter, Reporter {
 		final List<Result> hooks = new ArrayList<Result>();
 		Integer iteration = 1;
 
+		List<Step> simplifiedSteps = null;
+		List<Result> simplifiedResults = null;
+						
 		private TestMethod(ScenarioOutline scenarioOutline) {
 		}
 
@@ -258,16 +263,31 @@ class CucumberReporter implements Formatter, Reporter {
 			element.setAttribute("started-at", DATE_FORMAT.format(new Date()));
 		}
 
-		public void finish(Document doc, Element element) {
+		public void finish(Document doc, Element element) {			
+			Integer definitionSteps = 0;
+			for (int i = 0; i < steps.size(); i++) {
+				if (steps.get(i).getClass().toString()
+						.contains("gherkin.formatter.model.Step")) {
+					definitionSteps++;
+				}
+			}
+			simplifiedSteps = new ArrayList<Step>(
+					steps.subList(iteration * definitionSteps,
+							(iteration * definitionSteps) + definitionSteps));
+			simplifiedResults = new ArrayList<Result>(
+					results.subList((iteration - 1) * definitionSteps,
+							iteration * definitionSteps));
+			
 			element.setAttribute("duration-ms", calculateTotalDurationString());
 			element.setAttribute("finished-at", DATE_FORMAT.format(new Date()));
 			StringBuilder stringBuilder = new StringBuilder();
+									
 			addStepAndResultListing(stringBuilder);
 			Result skipped = null;
 			Result failed = null;
 			Result passedWithWarn = null;
-			steps.get(iteration);
-			for (Result result : results) {
+
+			for (Result result : simplifiedResults) {
 				if ("failed".equals(result.getStatus())) {
 					failed = result;
 				} else if ("undefined".equals(result.getStatus())
@@ -277,7 +297,6 @@ class CucumberReporter implements Formatter, Reporter {
 						&& "passed".equals(result.getStatus())) {
 					passedWithWarn = result;
 				}
-
 			}
 			for (Result result : hooks) {
 				if (failed == null && "failed".equals(result.getStatus())) {
@@ -307,7 +326,7 @@ class CucumberReporter implements Formatter, Reporter {
 			} else if (passedWithWarn != null) {
 				element.setAttribute("status", "PASS");
 				element.setAttribute("warn", "TRUE");
-				for (Result result : results) {
+				for (Result result : simplifiedResults) {
 					StringWriter stringWriter = new StringWriter();
 					if ((result.getError() != null)
 							&& "passed".equals(result.getStatus())) {
@@ -333,7 +352,7 @@ class CucumberReporter implements Formatter, Reporter {
 
 		private String calculateTotalDurationString() {
 			long totalDurationNanos = 0;
-			for (Result r : results) {
+			for (Result r : simplifiedResults) {
 				totalDurationNanos += r.getDuration() == null ? 0 : r
 						.getDuration();
 			}
@@ -345,22 +364,7 @@ class CucumberReporter implements Formatter, Reporter {
 		}
 
 		private void addStepAndResultListing(StringBuilder sb) {
-
-			Integer definitionSteps = 0;
-			for (int i = 0; i < steps.size(); i++) {
-				if (steps.get(i).getClass().toString()
-						.contains("gherkin.formatter.model.Step")) {
-					definitionSteps++;
-				}
-			}
-
-			final List<Step> simplifiedSteps = new ArrayList<Step>(
-					steps.subList(iteration * definitionSteps,
-							(iteration * definitionSteps) + definitionSteps));
-			final List<Result> simplifiedResults = new ArrayList<Result>(
-					results.subList((iteration - 1) * definitionSteps,
-							iteration * definitionSteps));
-
+			
 			for (int i = 0; i < simplifiedSteps.size(); i++) {
 				int length = sb.length();
 				String resultStatus = "not executed";

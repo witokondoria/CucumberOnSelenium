@@ -6,4 +6,8 @@ public class AssertionWarn extends Error {
 
 	public AssertionWarn() {
 	}
+
+	public AssertionWarn(String message) {
+		super(message);
+	}
 }

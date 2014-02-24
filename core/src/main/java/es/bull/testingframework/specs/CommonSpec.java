@@ -1,5 +1,6 @@
 package es.bull.testingframework.specs;
 
+import static org.testng.Assert.fail;
 import ij.ImagePlus;
 import ij.io.FileSaver;
 import ij.plugin.ImageCalculator;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -29,6 +31,8 @@ public class CommonSpec {
 	private String shortBrowser;
 	private final Logger logger = LoggerFactory.getLogger(ThreadProperty
 			.get("class"));
+
+	private long startTS;
 
 	public void setDriver(WebDriver driver) {
 		this.driver = driver;
@@ -64,6 +68,33 @@ public class CommonSpec {
 
 	public void setCurrentElements(List<WebElement> currentElements) {
 		this.currentElements = currentElements;
+	}
+
+	public long getStartTS() {
+		return startTS;
+	}
+
+	public void setStartTS(long startTS) {
+		this.startTS = startTS;
+	}
+
+	public List<WebElement> locateElements(String attrib, String value) {
+		List<WebElement> elems = null;
+
+		this.getLogger().info("{}: Locating elements", this.getShortBrowser());
+
+		if (attrib.equals("id")) {
+			elems = this.getDriver().findElements(By.id(value));
+		} else if (attrib.equals("name")) {
+			elems = this.getDriver().findElements(By.name(value));
+		} else if (attrib.equals("class")) {
+			elems = this.getDriver().findElements(By.className(value));
+		} else if (attrib.equals("xpath")) {
+			elems = this.getDriver().findElements(By.xpath(value));
+		} else {
+			fail("Unimplemented locator method");
+		}
+		return elems;
 	}
 
 	public Double capsCompare(String pestanya, BufferedImage capture,
@@ -119,17 +150,14 @@ public class CommonSpec {
 		int eleHeight = element.getSize().getHeight();
 		int startWidth = 0;
 		int startHeight = 0;
-		switch (shortBrowser.substring(0, 1)) {
-		case "P":
+		if (shortBrowser.substring(0, 1).equals("P")) {
 			startWidth = element.getLocation().getX();
 			startHeight = element.getLocation().getY();
-			break;
-		default:
+		} else {
 			startWidth = ((Locatable) element).getCoordinates().inViewPort()
 					.getX();
 			startHeight = ((Locatable) element).getCoordinates().inViewPort()
 					.getY();
-			break;
 		}
 
 		BufferedImage eleScreenshot = fullImg.getSubimage(startWidth,

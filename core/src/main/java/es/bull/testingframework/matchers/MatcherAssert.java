@@ -15,7 +15,7 @@ public class MatcherAssert {
                        .appendText("\n     but: ");
             matcher.describeMismatch(actual, description);
             
-            throw new AssertionWarn(/*description.toString()*/);
+            throw new AssertionWarn(description.toString());
         }
     }    
 }

@@ -7,11 +7,14 @@ Característica: Contenido válido en los contenedores destacados
 
 		Dado que navego a "http://www.rtve.es"		
 		Cuando maximizo el navegador
-		Entonces existe al menos un elemento con "<tag>" "<contenedor>"
-		Y el primero de ellos no contiene elementos con clase "<contenido_invalido>"
-		Pero si existe mas de uno, "<warn>" habrá que generar un aviso			
+		Entonces existe al menos un elemento con atributo "<attrib>" y valor "<name>"		
+		Y ninguno está vacio
+		Y contienen al menos un elemento con clase "<contenido_imperativo>"		
+	
 		
 			Ejemplos:
-			| tag  | contenedor              | warn | contenido_invalido |
-			| name | tablaNoticiasDestacadas | si   | newsie 			 |	
-#			| id   | moduloTVE               | no   | news, encuesta	 |
+			| attrib | name                    | contenido_imperativo | 
+			| name   | tablaNoticiasDestacadas | news	              |  
+			| id     | moduloTVE               | news                 | 
+#			| id	 | moduloRNE               | news                 |
+#			| class  | Tiempo                  | news                 |

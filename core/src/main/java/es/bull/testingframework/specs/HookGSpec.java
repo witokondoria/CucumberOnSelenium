@@ -18,9 +18,7 @@ import cucumber.api.java.Before;
 import es.bull.testingframework.ThreadProperty;
 import es.bull.testingframework.specs.CommonSpec;
 
-public class HookGSpec {
-
-	private CommonSpec commonspec;
+public class HookGSpec extends BaseSpec {
 
 	public HookGSpec(CommonSpec spec) {
 		this.commonspec = spec;
@@ -41,20 +39,15 @@ public class HookGSpec {
 
 		DesiredCapabilities capabilities = null;
 
-		switch (browserType.toLowerCase()) {
-		case "chrome":
+		if (browserType.toLowerCase().equals("chrome")) {
 			capabilities = DesiredCapabilities.chrome();
-			break;
-		case "firefox":
+		} else if (browserType.toLowerCase().equals("firefox")) {
 			capabilities = DesiredCapabilities.firefox();
-			break;
-		case "phantomjs":
+		} else if (browserType.toLowerCase().equals("phantomjs")) {
 			capabilities = DesiredCapabilities.phantomjs();
-			break;
-		case "internet explorer":
+		} else if (browserType.toLowerCase().equals("internet explorer")) {
 			capabilities = DesiredCapabilities.internetExplorer();
-			break;
-		default:
+		} else {
 			commonspec.getLogger().error("Unknown browser: " + browserType);
 			throw new SeleniumException("Unknown browser: " + browserType);
 		}
@@ -75,7 +68,7 @@ public class HookGSpec {
 		commonspec.getDriver().manage().timeouts()
 				.setScriptTimeout(30, TimeUnit.SECONDS);
 
-		//FIXME: shamefully hardcoded
+		// FIXME: shamefully hardcoded
 		commonspec.getDriver().manage().window()
 				.setSize(new Dimension(1366, 768));
 

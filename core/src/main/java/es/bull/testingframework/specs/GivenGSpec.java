@@ -4,11 +4,8 @@ import org.openqa.selenium.By;
 
 import cucumber.api.java.en.Given;
 import cucumber.api.java.es.Dado;
-import es.bull.testingframework.specs.CommonSpec;
 
-public class GivenGSpec {
-
-	private CommonSpec commonspec;
+public class GivenGSpec extends BaseSpec {
 
 	public GivenGSpec(CommonSpec spec) {
 		this.commonspec = spec;
@@ -19,6 +16,7 @@ public class GivenGSpec {
 	public void browseTo(String url) {
 		commonspec.getLogger().info("{}: Browsing to {}",
 				commonspec.getShortBrowser(), url);
+		commonspec.setStartTS(System.currentTimeMillis());
 		commonspec.getDriver().get(url);
 	}
 	

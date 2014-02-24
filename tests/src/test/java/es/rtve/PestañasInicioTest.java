@@ -9,10 +9,10 @@ import es.bull.testingframework.cucumber.testng.CucumberRunner;
 import es.bull.testingframework.data.SelectableDataProvider;
 
 @CucumberOptions(features = { "src/test/resources/es/rtve/pestañasInicio.feature" })
-public class PestañasInicioTes extends BaseTest {
+public class PestañasInicioTest extends BaseTest {
 
 	@Factory(dataProviderClass = SelectableDataProvider.class, dataProvider = "selectableBrowsers")
-	public PestañasInicioTes(String browser) {
+	public PestañasInicioTest(String browser) {
 		this.browser = browser;
 	}
 

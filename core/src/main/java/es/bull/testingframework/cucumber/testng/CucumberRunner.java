@@ -7,12 +7,14 @@ import java.util.List;
 
 import cucumber.api.CucumberOptions;
 import cucumber.runtime.ClassFinder;
+import cucumber.runtime.CucumberException;
 import cucumber.runtime.RuntimeOptions;
 import cucumber.runtime.RuntimeOptionsFactory;
 import cucumber.runtime.Utils;
 import cucumber.runtime.io.MultiLoader;
 import cucumber.runtime.io.ResourceLoader;
 import cucumber.runtime.io.ResourceLoaderClassFinder;
+import es.bull.testingframework.matchers.AssertionWarn;
 
 public class CucumberRunner {
 
@@ -45,5 +47,9 @@ public class CucumberRunner {
 
 	public void runCukes() throws IOException {
 		runtime.run();
+		
+        if (!runtime.getErrors().isEmpty() && !(runtime.getErrors().get(0) instanceof AssertionWarn)) {
+            throw new CucumberException(runtime.getErrors().get(0));
+        }
 	}
 }

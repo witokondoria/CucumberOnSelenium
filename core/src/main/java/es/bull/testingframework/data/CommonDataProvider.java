@@ -28,26 +28,44 @@ public class CommonDataProvider {
 	}
 
 	public static ArrayList<String> gridBrowsers() throws IOException {
-		ArrayList<String> response = new ArrayList<>();
+		ArrayList<String> response = new ArrayList<String>();
 
 		String URL = System.getProperty("selenium.gridHub");
 		URL = URL + "/grid/console";
-		Document doc = Jsoup.connect(URL).timeout(10000).get();
-
+		Document doc = Jsoup.connect(URL).timeout(20000).get();
 		Elements slaves = doc.select("div.proxy");
 
 		for (Element slave : slaves) {
 			String slaveStatus = slave.select("p.proxyname").first().text();
 			if (!slaveStatus.contains("Connection")) {
+				Integer iBusy = 0;
 				Elements browserList = slave.select("div.content_detail")
 						.select("*[title]");
+				Elements busyBrowserList = slave.select("div.content_detail")
+						.select("p > .busy");
 				for (Element browserDetails : browserList) {
-					Pattern pat = Pattern
-							.compile("browserName=(.*?),.*?(version=(.*?))?}");
-					Matcher m = pat.matcher(browserDetails.attr("title"));
-
-					while (m.find()) {
-						response.add(m.group(1) + "_" + m.group(3));
+					if (browserDetails.attr("title").startsWith("{")) {
+						Pattern pat = Pattern
+								.compile("browserName=(.*?),.*?(version=(.*?))?}");
+						Matcher m = pat.matcher(browserDetails.attr("title"));
+						while (m.find()) {
+							response.add(m.group(1) + "_" + m.group(3));
+						}
+					} else {
+						String version = busyBrowserList.get(iBusy).parent()
+								.text();
+						String browser = busyBrowserList.get(iBusy).text();
+						version = version.substring(2);
+						version = version.replace(browser, "");
+						String browserSrc = busyBrowserList.get(iBusy)
+								.select("img").attr("src");
+						if (!browserSrc.equals("")) {
+							browser = browserSrc.substring(
+									browserSrc.lastIndexOf("/") + 1,
+									browserSrc.length() - 4);
+						}
+						response.add(browser + "_" + version);
+						iBusy++;
 					}
 				}
 			}
@@ -58,11 +76,11 @@ public class CommonDataProvider {
 
 	protected static ArrayList<String> selectedBrowsers(String method)
 			throws IOException {
-		ArrayList<String> response = new ArrayList<>();
+		ArrayList<String> response = new ArrayList<String>();
 
-		ArrayList<String> availableBrowsers = new ArrayList<>(gridBrowsers());
+		ArrayList<String> availableBrowsers = new ArrayList<String>(gridBrowsers());
 		availableBrowsers = gridUniqueBrowsers(availableBrowsers);
-		
+
 		Properties props = new Properties();
 
 		InputStream stream = new FileInputStream("./environment.properties");
@@ -79,14 +97,14 @@ public class CommonDataProvider {
 			String[] aBr = settings.split(",");
 
 			for (String br : aBr) {
-				if (!br.contains("_") && !br.equals("")) { // no version specified
+				if (!br.contains("_") && !br.equals("")) { // no version
+															// specified
 					for (String browser : availableBrowsers) {
 						if (browser.startsWith(br)) {
 							response.add(browser);
 						}
 					}
-				}
-				else if (availableBrowsers.contains(br) && !br.equals("")) {
+				} else if (availableBrowsers.contains(br) && !br.equals("")) {
 					response.add(br);
 				}
 			}

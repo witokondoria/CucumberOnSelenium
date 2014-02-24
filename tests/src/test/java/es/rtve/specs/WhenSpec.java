@@ -13,13 +13,6 @@ public class WhenSpec extends BaseSpec {
 		this.commonspec = spec;
 	}
 
-	@Cuando("^maximizo el navegador$")
-	public void maximize() {
-		commonspec.getLogger().info("{}: Maximizing the browser window",
-				commonspec.getShortBrowser());
-		commonspec.getDriver().manage().window().maximize();
-	}
-
 	@Cuando("^hago click en la pestaña \"(.+?)\"$")
 	public void clickOnTab(String tabTitle) {
 		commonspec.getLogger().info("{}: Clicking on tab {}",
