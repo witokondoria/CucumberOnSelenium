@@ -16,7 +16,7 @@ public class PestañasInicioTest extends BaseTest {
 		this.browser = browser;
 	}
 
-	@Test
+	@Test(enabled = false, groups = {"gr2", "gr3"})
 	public void cucumberTest() throws Exception {				
 			new CucumberRunner(this.getClass(), this.browser).runCukes();
 	}

@@ -16,23 +16,23 @@ abstract public class BaseTest{
 		return this.browser;
 	}
 	
-	@BeforeSuite
+	@BeforeSuite (alwaysRun = true)
 	public void beforeSuite() throws IOException {
 	}
 
-	@BeforeClass
+	@BeforeClass(alwaysRun = true) 
 	public void beforeClass() {
 		ThreadProperty.set("class", this.getClass().getCanonicalName());
 	}
 
-	@AfterClass
-	public void afterClass() {
-		
-	}
-	
-	@BeforeMethod
+	@BeforeMethod(alwaysRun = true) 
 	public void beforeMethod(Method method) {
 		ThreadProperty.set("browser", this.browser);
 		//TODO: parallel execution and priorization based on grid status
+	}
+	
+	@AfterClass() 
+	public void afterClass() {
+		
 	}
 }

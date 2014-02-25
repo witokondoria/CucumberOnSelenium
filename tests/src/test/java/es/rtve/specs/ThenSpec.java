@@ -33,16 +33,13 @@ public class ThenSpec extends BaseSpec {
 		commonspec.getLogger().info("{}: Verifying tab {} isn't greyed",
 				commonspec.getShortBrowser(), tabTitle);
 
-		switch (tabTitle) {
-		case "Televisión":
+		if (tabTitle.equals("Televisión")) {
 			assertThat("Current tab " + tabTitle + " with bad color",
 					tab.getCssValue("background-color"),
 					not(equalTo("rgba(119, 119, 119, 1)")));
-			break;
-		default:
+		} else {
 			assertThat("Current tab " + tabTitle + " with bad color",
 					tab.getCssValue("background"), containsString("color-stop"));
-			break;
 		}
 	}
 
@@ -68,7 +65,7 @@ public class ThenSpec extends BaseSpec {
 	}
 
 	@Entonces("^existe al menos un elemento con atributo \"(.*?)\" y valor \"(.*?)\"$")
-	public void assertContainerExists(String attrib, String value) {		
+	public void assertContainerExists(String attrib, String value) {
 
 		commonspec.getLogger().info("{}: Verifying container existance",
 				commonspec.getShortBrowser());
@@ -77,7 +74,7 @@ public class ThenSpec extends BaseSpec {
 
 		assertThat("No elements found with expected " + attrib + ": " + value,
 				elems.size(), greaterThan(0));
-		
+
 		commonspec.setCurrentElements(elems);
 	}
 

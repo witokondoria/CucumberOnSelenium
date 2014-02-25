@@ -22,12 +22,47 @@
 	<link rel="stylesheet" href="/userContent/jquery.fancybox.css" type="text/css" media="screen" />
     <script type="text/javascript" src="/userContent/jquery.fancybox.pack.js"></script>
 		
-    <script type="text/javascript">  
+<script type="text/javascript">  	
+		function afterLoading(current, previous) {
+			$("iframe.fancybox-iframe").contents().find("#side-panel").hide();
+			$("iframe.fancybox-iframe").contents().find("#header").hide();
+			$("iframe.fancybox-iframe").contents().find("#footer").hide();		
+		}
+		
+		function afterShowing() {
+			$("iframe.fancybox-iframe").contents().find("#map").find("area").bind("click", doInterceptClickArea);			
+			$("iframe.fancybox-iframe").contents().find("#report").find("a").bind("click", doInterceptClickA);			
+		}
+		
+		var doInterceptClickA = function (e) {
+			e.preventDefault();
+		}
+
+		var doInterceptClickArea = function (e) {
+			console.log("clicked an area");
+			e.preventDefault();
+			var link = $(this).attr("href");
+			$.fancybox.open({
+				href: link,
+				type: 'iframe',
+				fitToView: false,
+				autoSize: false,
+				autoDimensions: false,
+				width: 850,
+				height: 600,
+				afterLoad: function(current, previous) {					
+					afterLoading (current, previous);
+				},
+				afterShow: function() {					
+					afterShowing();
+				},
+			});						
+		}
+				
         $(document).ready(function(){
             $("#results tr.results").addClass("odd");
             $("#results tr.detailedresults").hide();
             $("#results tr.results:first-child").show();     
-     			
 			$('.fancybox').fancybox({
 				fitToView: false,
 				autoSize: false,
@@ -35,25 +70,18 @@
 				width: 850,
 				height: 600,
 				afterLoad: function(current, previous) {					
-					$("iframe.fancybox-iframe").contents().find("#side-panel").hide();
-					$("iframe.fancybox-iframe").contents().find("#header").hide();
-					$("iframe.fancybox-iframe").contents().find("#footer").hide();					
+					afterLoading(current, previous);			
 				},
-				afterShow: function() {
-					console.log($("iframe.fancybox-iframe").contents().find("#map"));
-					$("iframe.fancybox-iframe").contents().find("#map").find("area").bind("click", function(e) {
-						e.preventDefault();
-					}
-					$("iframe.fancybox-iframe").contents().find("#map").find("a").bind("click", function(e) {
-						e.preventDefault();
-					}
+				afterShow: function() {				
+					afterShowing();
 				},	
 			});
-	 
+			
             $("#results tr.results > td:not(.feature)").click(function(){
-                $(this).parent().next("tr").toggle();
+				$("#results tr.detailedresults").hide();
+                $(this).parent().next("tr").show();
             });
 	     });
-		
     </script>
 	</head>
+	

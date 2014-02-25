@@ -13,8 +13,8 @@ Característica: Coloreado de las pestañas de cada portada
 		
 			Ejemplos:
 			| tab         |
-#			| Noticias    |
-			| Televisión  |
+			| Noticias    |
+#			| Televisión  |
 #			| Radio       |
 #			| Deportes    |			
 #			| El Tiempo   |			

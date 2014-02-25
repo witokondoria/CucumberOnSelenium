@@ -15,6 +15,6 @@ Característica: Contenido válido en los contenedores destacados
 			Ejemplos:
 			| attrib | name                    | contenido_imperativo | 
 			| name   | tablaNoticiasDestacadas | news	              |  
-			| id     | moduloTVE               | news                 | 
+#			| id     | moduloTVE               | news                 | 
 #			| id	 | moduloRNE               | news                 |
 #			| class  | Tiempo                  | news                 |

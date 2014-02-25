@@ -9,6 +9,8 @@ Característica: Tiempo de carga aceptable
 		Entonces el tiempo en segundos transcurrido ha de ser menor a "<tiempo_esperado>"		
 	
 			Ejemplos:
-			| página                    | tiempo_esperado | 
-			| http://www.rtve.es/       | 10              |  			
-			| http://www.rtve.es/radio  | 10              |
+			| página                      | tiempo_esperado | 
+			| http://www.rtve.es/         | 10              |  			
+#			| http://www.rtve.es/radio    | 10              |
+#			| http://www.rtve.es/eltiempo | 5               |
+#			| http://www.rtve.es/infantil | 5               |

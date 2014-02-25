@@ -16,7 +16,7 @@ public class TiempoCargaTest extends BaseTest {
 		this.browser = browser;
 	}
 
-	@Test
+	@Test(enabled = true, groups = {"gr3", "gr4"})
 	public void cucumberTest() throws Exception {				
 			new CucumberRunner(this.getClass(), this.browser).runCukes();
 	}

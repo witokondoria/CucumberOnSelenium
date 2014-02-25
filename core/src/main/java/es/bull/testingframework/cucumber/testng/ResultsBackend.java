@@ -113,6 +113,9 @@ public class ResultsBackend {
 			if (result.getBrowser().equals(browser)
 					&& result.getData().equals(data)
 					&& result.getClazz().equals(clazz)) {
+				
+				data = data.replaceAll("[\\\\|\\/|\\|:]", "_");
+				
 				response = "<a href='" + BUILD_URL + "/testngreports/"
 						+ clazz.substring(0, clazz.lastIndexOf(".")) + "/"
 						+ clazz + "/" + feature + " " + data + " " + browser

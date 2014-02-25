@@ -35,11 +35,11 @@ public class SeleniumAspect {
 			return retVal;
 		} catch (AssertionError ae) {
 			newEx = treatException(pjp, ae);
+			throw newEx;
 		} catch (WebDriverException wex) {
 			newEx = treatException(pjp, wex);
-		} finally {
 			throw newEx;
-		}
+		} 
 	}
 
 	public Throwable treatException(ProceedingJoinPoint pjp, Throwable ex)
