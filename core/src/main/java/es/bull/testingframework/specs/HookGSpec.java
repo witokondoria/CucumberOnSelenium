@@ -29,6 +29,8 @@ public class HookGSpec extends BaseSpec {
 		String browserType = "";
 
 		commonspec.setBrowser(ThreadProperty.get("browser"));
+		commonspec.getLogger().info("Setting up selenium for {}",
+				ThreadProperty.get("class"));
 		String hub = System.getProperty("selenium.gridHub");
 		hub = hub + "/wd/hub";
 		browserType = commonspec.getBrowser().split("_")[0];

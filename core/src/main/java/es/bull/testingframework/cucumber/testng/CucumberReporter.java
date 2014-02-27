@@ -106,7 +106,11 @@ class CucumberReporter implements Formatter, Reporter {
 	public void startOfScenarioLifeCycle(Scenario scenario) {
 		root = document.createElement("test-method");
 		clazz.appendChild(root);
-		testMethod.start(root, iteration);	
+		if (testMethod == null) {
+			testMethod = new TestMethod(scenario);
+			testMethod.feature = feat;
+		}
+		testMethod.start(root, iteration);
 		iteration++;
 	}
 
@@ -222,7 +226,8 @@ class CucumberReporter implements Formatter, Reporter {
 		for (int i = 0; i < testCaseNodes.getLength(); i++) {
 			try {
 				String duration = "0";
-				Node durationms = testCaseNodes.item(i).getAttributes().getNamedItem("duration-ms");
+				Node durationms = testCaseNodes.item(i).getAttributes()
+						.getNamedItem("duration-ms");
 				if (durationms != null) {
 					duration = durationms.getNodeValue();
 				}
@@ -248,8 +253,11 @@ class CucumberReporter implements Formatter, Reporter {
 
 		List<Step> simplifiedSteps = null;
 		List<Result> simplifiedResults = null;
-						
+
 		private TestMethod(ScenarioOutline scenarioOutline) {
+		}
+
+		private TestMethod(Scenario scenario) {
 		}
 
 		private void start(Element element, Integer iteration) {
@@ -263,7 +271,7 @@ class CucumberReporter implements Formatter, Reporter {
 			element.setAttribute("started-at", DATE_FORMAT.format(new Date()));
 		}
 
-		public void finish(Document doc, Element element) {			
+		public void finish(Document doc, Element element) {
 			Integer definitionSteps = 0;
 			for (int i = 0; i < steps.size(); i++) {
 				if (steps.get(i).getClass().toString()
@@ -271,17 +279,17 @@ class CucumberReporter implements Formatter, Reporter {
 					definitionSteps++;
 				}
 			}
-			simplifiedSteps = new ArrayList<Step>(
-					steps.subList(iteration * definitionSteps,
-							(iteration * definitionSteps) + definitionSteps));
-			simplifiedResults = new ArrayList<Result>(
-					results.subList((iteration - 1) * definitionSteps,
-							iteration * definitionSteps));
-			
+			simplifiedSteps = new ArrayList<Step>(steps.subList(iteration
+					* definitionSteps, (iteration * definitionSteps)
+					+ definitionSteps));
+			simplifiedResults = new ArrayList<Result>(results.subList(
+					(iteration - 1) * definitionSteps, iteration
+							* definitionSteps));
+
 			element.setAttribute("duration-ms", calculateTotalDurationString());
 			element.setAttribute("finished-at", DATE_FORMAT.format(new Date()));
 			StringBuilder stringBuilder = new StringBuilder();
-									
+
 			addStepAndResultListing(stringBuilder);
 			Result skipped = null;
 			Result failed = null;
@@ -347,7 +355,8 @@ class CucumberReporter implements Formatter, Reporter {
 			results.addScenarioResult(ThreadProperty.get("class"),
 					feature.getName(), ThreadProperty.get("browser"),
 					ThreadProperty.get("dataSet"),
-					element.getAttribute("status"), element.getAttribute("warn"));
+					element.getAttribute("status"),
+					element.getAttribute("warn"));
 		}
 
 		private String calculateTotalDurationString() {
@@ -364,7 +373,7 @@ class CucumberReporter implements Formatter, Reporter {
 		}
 
 		private void addStepAndResultListing(StringBuilder sb) {
-			
+
 			for (int i = 0; i < simplifiedSteps.size(); i++) {
 				int length = sb.length();
 				String resultStatus = "not executed";

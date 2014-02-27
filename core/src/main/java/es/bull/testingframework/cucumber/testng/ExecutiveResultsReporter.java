@@ -15,8 +15,10 @@ import org.testng.TestListenerAdapter;
 public class ExecutiveResultsReporter extends TestListenerAdapter {
 
 	public String toImgTag(String browser) {
-		return "<img src='/userContent/" + browser + ".png'>";
-
+		
+		ResultsBackend results = ResultsBackend.getInstance();
+		String webcontext = results.getContext();
+		return "<img src='" + webcontext + "/userContent/cucumber/" + browser + ".png'>";
 	}
 
 	@Override
@@ -25,8 +27,10 @@ public class ExecutiveResultsReporter extends TestListenerAdapter {
 		try {
 			ClassLoader classLoader = Thread.currentThread()
 					.getContextClassLoader();
-			InputStream template = classLoader
-					.getResourceAsStream("dashboard_header.html");
+			InputStream template1 = classLoader
+					.getResourceAsStream("dashboard_header1.html");
+			InputStream template2 = classLoader
+					.getResourceAsStream("dashboard_header2.html");
 
 			File fout = new File("target/executions/dashboard.html");
 			fout.getParentFile().mkdirs();
@@ -34,17 +38,27 @@ public class ExecutiveResultsReporter extends TestListenerAdapter {
 
 			int len = 0;
 			byte[] buffer = new byte[1024];
-			while ((len = template.read(buffer)) != -1) {
+			while ((len = template1.read(buffer)) != -1) {
 				fos.write(buffer, 0, len);
 			}
 
 			Writer out = new OutputStreamWriter(fos, "UTF8");
-
 			PrintWriter writer = new PrintWriter(out, true);
 
-			writer.append("  <table id='results'>\n");
-
 			ResultsBackend results = ResultsBackend.getInstance();
+			String webcontext = results.getContext();
+			
+			writer.append("<script src='" + webcontext + "/userContent/cucumber/jquery-1.11.0.min.js' type='text/javascript'></script>\n");			
+			writer.append("<link rel='stylesheet' href='" + webcontext + "/userContent/cucumber/jquery.fancybox.css' type='text/css' media='screen' />\n");
+		    writer.append("<script type='text/javascript' src='" + webcontext + "/userContent/cucumber/jquery.fancybox.pack.js'></script>\n");
+		    writer.flush();
+			
+			len = 0;			
+			while ((len = template2.read(buffer)) != -1) {
+				fos.write(buffer, 0, len);
+			}
+			
+			writer.append("  <table id='results'>\n");
 
 			ArrayList<String> browsers = results.getSortedUniqueBrowsers();
 			ArrayList<String> classes = results.getSortedUniqueClasses();

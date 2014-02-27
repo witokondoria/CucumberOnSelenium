@@ -9,10 +9,13 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.binary.Base64;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import es.bull.testingframework.cucumber.testng.ResultsBackend;
 
 public class CommonDataProvider {
 
@@ -74,19 +77,70 @@ public class CommonDataProvider {
 		return response;
 	}
 
+	public static ArrayList<String> gridJenkinsBrowsers(String URL)
+			throws IOException {
+
+		ArrayList<String> response = new ArrayList<String>();
+		Document doc = null;
+
+		if (!URL.contains("localhost")) {
+			String username = "Bull";
+			String password = "bull";
+			String login = username + ":" + password;
+			String base64login = new String(Base64.encodeBase64(login
+					.getBytes()));
+
+			doc = Jsoup.connect(URL)
+					.header("Authorization", "Basic " + base64login)
+					.timeout(20000).get();
+		} else {
+			doc = Jsoup.connect(URL).timeout(20000).get();
+		}
+
+		Elements slaves = doc
+				.select("#main-panel > table > tbody > tr > td:nth-child(2)");
+
+		for (Element slave : slaves) {
+			Pattern pat = Pattern
+					.compile("browserName=(.*?),.*?(version=(.*?))?}");
+			Matcher m = pat.matcher(slave.ownText());
+			while (m.find()) {
+				response.add(m.group(1) + "_" + m.group(3));
+			}
+		}
+
+		return response;
+	}
+
 	protected static ArrayList<String> selectedBrowsers(String method)
 			throws IOException {
 		ArrayList<String> response = new ArrayList<String>();
-
-		ArrayList<String> availableBrowsers = new ArrayList<String>(gridBrowsers());
-		availableBrowsers = gridUniqueBrowsers(availableBrowsers);
+		ArrayList<String> availableBrowsers = null;
 
 		Properties props = new Properties();
 
 		InputStream stream = new FileInputStream("./environment.properties");
 		props.load(stream);
 
-		String settings = props.getProperty(method, "@grid{all_distinct}");
+		String seleniumOnJenkins = props.getProperty("seleniumOnJenkins", "");
+		ResultsBackend results = ResultsBackend.getInstance();
+
+		if (seleniumOnJenkins.equals("")) {
+			availableBrowsers = new ArrayList<String>(gridBrowsers());
+			results.setContext("");
+		} else {
+			// FIXME: parse context from seleniumOnJenkins variable
+			if (seleniumOnJenkins.contains("localhost")) { 
+				results.setContext("");
+			} else {
+				results.setContext("/jenkins");
+			}
+			availableBrowsers = new ArrayList<String>(
+					gridJenkinsBrowsers(seleniumOnJenkins));
+		}
+		availableBrowsers = gridUniqueBrowsers(availableBrowsers);
+
+		String settings = props.getProperty(method, "@grid {all_distinct}");
 		if (settings.equals("@grid {all_distinct}")) {
 			response = availableBrowsers;
 		} else if (settings.startsWith("@browsers")) {

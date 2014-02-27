@@ -9,12 +9,21 @@ public class ResultsBackend {
 	private static ResultsBackend instance = new ResultsBackend();
 
 	private ArrayList<ScenarioResult> sResult = new ArrayList<ScenarioResult>();
-
+	private String context = "";
+	
 	private ResultsBackend() {
 	}
 
 	public static ResultsBackend getInstance() {
 		return instance;
+	}
+
+	public String getContext() {
+		return context;
+	}
+
+	public void setContext(String context) {
+		this.context = context;
 	}
 
 	public ArrayList<ScenarioResult> getScenarioResult() {
@@ -124,15 +133,15 @@ public class ResultsBackend {
 				if (result.getWarn().equals("TRUE")) {
 					if (result.getExecutionResult().equals("PASS")) {
 						response = response
-								+ "<img alt='Passed test' src='/userContent/OKW.png'/></a>";
+								+ "<img alt='Passed test' src='" + context + "/userContent/cucumber/OKW.png'/></a>";
 					} 
 				} else {
 					if (result.getExecutionResult().equals("PASS")) {
 						response = response
-								+ "<img alt='Passed test' src='/userContent/OK.png'/></a>";
+								+ "<img alt='Passed test' src='" + context + "/userContent/cucumber/OK.png'/></a>";
 					} else if (result.getExecutionResult().equals("FAIL")) {
 						response = response
-								+ "<img alt='Failed test' src='/userContent/KO.png'/></a>";
+								+ "<img alt='Failed test' src='" + context + "/userContent/cucumber/KO.png'/></a>";
 					}
 				}
 			}

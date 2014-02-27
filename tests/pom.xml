@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>es.bull.testingframework</groupId>
 		<artifactId>cucumberOnSelenium</artifactId>
-		<version>1</version>
+		<version>1.01</version>
 	</parent>
 	<groupId>es.rtve</groupId>
 	<artifactId>tests</artifactId>
