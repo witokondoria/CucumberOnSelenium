@@ -28,6 +28,7 @@ public class ThenSpec extends BaseSpec {
 
 	@Entonces("^la pestaña \"(.*?)\" debe tener un color distinto de gris$")
 	public void assertTabNotGrey(String tabTitle) {
+			
 		WebElement tab = commonspec.getDriver().findElement(
 				By.xpath("//li/a[@title='" + tabTitle + "']"));
 		commonspec.getLogger().info("{}: Verifying tab {} isn't greyed",

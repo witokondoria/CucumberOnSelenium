@@ -10,7 +10,7 @@ public class ResultsBackend {
 
 	private ArrayList<ScenarioResult> sResult = new ArrayList<ScenarioResult>();
 	private String context = "";
-	
+
 	private ResultsBackend() {
 	}
 
@@ -40,10 +40,11 @@ public class ResultsBackend {
 		return response;
 	}
 
-	public void addScenarioResult(String clazz, String feature, String browser,
-			String data, String executionResult, String warn) {
-		ScenarioResult result = new ScenarioResult(clazz, feature, browser,
-				data, executionResult, warn);
+	public void addScenarioResult(String clazz, String feature,
+			Integer position, String scenarioName, String browser, String data,
+			String executionResult, String warn) {
+		ScenarioResult result = new ScenarioResult(clazz, feature, position,
+				scenarioName, browser, data, executionResult, warn);
 		sResult.add(result);
 	}
 
@@ -112,8 +113,8 @@ public class ResultsBackend {
 		return response;
 	}
 
-	public String getExecutionResults(String clazz, String data,
-			String browser, String feature) {
+	public String getExecutionResults(String clazz, String scenario,
+			String data, String browser, String feature) {
 
 		String response = "-";
 		String BUILD_URL = System.getenv().get("BUILD_URL");
@@ -121,10 +122,11 @@ public class ResultsBackend {
 		for (ScenarioResult result : sResult) {
 			if (result.getBrowser().equals(browser)
 					&& result.getData().equals(data)
+					&& result.getScenario().equals(scenario)
 					&& result.getClazz().equals(clazz)) {
-				
+
 				data = data.replaceAll("[\\\\|\\/|\\|:]", "_");
-				
+
 				response = "<a href='" + BUILD_URL + "/testngreports/"
 						+ clazz.substring(0, clazz.lastIndexOf(".")) + "/"
 						+ clazz + "/" + feature + " " + data + " " + browser
@@ -132,21 +134,23 @@ public class ResultsBackend {
 
 				if (result.getWarn().equals("TRUE")) {
 					if (result.getExecutionResult().equals("PASS")) {
-						response = response
-								+ "<img alt='Passed test' src='" + context + "/userContent/cucumber/OKW.png'/></a>";
-					} 
+						response = response + "<img alt='Passed test' src='"
+								+ context
+								+ "/userContent/cucumber/OKW.png'/></a>";
+					}
 				} else {
 					if (result.getExecutionResult().equals("PASS")) {
-						response = response
-								+ "<img alt='Passed test' src='" + context + "/userContent/cucumber/OK.png'/></a>";
+						response = response + "<img alt='Passed test' src='"
+								+ context
+								+ "/userContent/cucumber/OK.png'/></a>";
 					} else if (result.getExecutionResult().equals("FAIL")) {
-						response = response
-								+ "<img alt='Failed test' src='" + context + "/userContent/cucumber/KO.png'/></a>";
+						response = response + "<img alt='Failed test' src='"
+								+ context
+								+ "/userContent/cucumber/KO.png'/></a>";
 					}
 				}
 			}
 		}
-
 		return response;
 	}
 
@@ -159,36 +163,51 @@ public class ResultsBackend {
 		return "-";
 	}
 
-	public ArrayList<String> getUniqueData(String clazz) {
+	public ArrayList<String> getData(String clazz, String scenario) {
 		ArrayList<String> datas = new ArrayList<String>();
 
 		for (ScenarioResult resultdata : sResult) {
-			if (resultdata.getClazz().equals(clazz)) {
+			if ((resultdata.getClazz().equals(clazz))
+					&& (resultdata.getScenario().equals(scenario))) {
 				datas.add(resultdata.getData());
 			}
 		}
-
-		HashSet<String> hs = new HashSet<String>();
-		hs.addAll(datas);
-		datas.clear();
-		datas.addAll(hs);
-		Collections.sort(datas);
 		return datas;
+	}
+
+	public ArrayList<String> getScenarios(String clazz) {
+		ArrayList<String> scenarios = new ArrayList<String>();
+
+		String previousScenario = "";
+		for (ScenarioResult resultdata : sResult) {
+			String currentScenario = resultdata.getScenario();
+			if ((resultdata.getClazz().equals(clazz))
+					&& (!currentScenario.equals(previousScenario))) {
+				previousScenario = currentScenario;
+				scenarios.add(currentScenario);
+			}
+		}
+		return scenarios;
 	}
 
 	public class ScenarioResult {
 
 		private String clazz;
 		private String feature;
+		private Integer position;
+		private String scenario;
 		private String browser;
 		private String data;
 		private String executionResult;
 		private String warn;
 
-		public ScenarioResult(String clazz, String feature, String browser,
-				String data, String executionResult, String warn) {
+		public ScenarioResult(String clazz, String feature, Integer position,
+				String scenario, String browser, String data,
+				String executionResult, String warn) {
 			this.setClazz(clazz);
 			this.setFeature(feature);
+			this.setPosition(position);
+			this.setScenario(scenario);
 			this.setBrowser(browser);
 			this.setData(data);
 			this.setExecutionResult(executionResult);
@@ -201,6 +220,22 @@ public class ResultsBackend {
 
 		public void setClazz(String clazz) {
 			this.clazz = clazz;
+		}
+
+		public Integer getPosition() {
+			return position;
+		}
+
+		public void setPosition(Integer position) {
+			this.position = position;
+		}
+
+		public String getScenario() {
+			return scenario;
+		}
+
+		public void setScenario(String scenario) {
+			this.scenario = scenario;
 		}
 
 		public String getFeature() {

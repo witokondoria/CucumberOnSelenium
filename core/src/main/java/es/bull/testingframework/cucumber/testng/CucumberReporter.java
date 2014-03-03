@@ -51,15 +51,17 @@ class CucumberReporter implements Formatter, Reporter {
 	private Element clazz;
 	private Element root;
 	private TestMethod testMethod;
-	private Integer iteration = 1;
-	private String callerClass = "";
 	private Feature feat;
+	private Examples tmpExamples;
+	private List<Result> tmpHooks = new ArrayList<Result>();
+	private List<Step> tmpSteps = new ArrayList<Step>();
+	private Integer iteration = 0;
+	private Integer position = 0;
 
-	public CucumberReporter(URL url, String callerClass) throws IOException {
+	public CucumberReporter(URL url) throws IOException {
 		this.writer = new UTF8OutputStreamWriter(new URLOutputStream(url));
 		TestMethod.treatSkippedAsFailure = false;
 		try {
-			this.callerClass = callerClass;
 			document = DocumentBuilderFactory.newInstance()
 					.newDocumentBuilder().newDocument();
 			results = document.createElement("testng-results");
@@ -87,40 +89,9 @@ class CucumberReporter implements Formatter, Reporter {
 	public void feature(Feature feature) {
 		feat = feature;
 		clazz = document.createElement("class");
-		clazz.setAttribute("name", this.callerClass);
+		// TODO: replace test (useless) with .. test group?
+		clazz.setAttribute("name", "test" + "." + feature.getName()); // this.callerClass
 		test.appendChild(clazz);
-	}
-
-	@Override
-	public void scenarioOutline(ScenarioOutline scenarioOutline) {
-		testMethod = new TestMethod(scenarioOutline);
-		testMethod.feature = feat;
-	}
-
-	@Override
-	public void examples(Examples examples) {
-		testMethod.examplesData = examples;
-	}
-
-	@Override
-	public void startOfScenarioLifeCycle(Scenario scenario) {
-		root = document.createElement("test-method");
-		clazz.appendChild(root);
-		if (testMethod == null) {
-			testMethod = new TestMethod(scenario);
-			testMethod.feature = feat;
-		}
-		testMethod.start(root, iteration);
-		iteration++;
-	}
-
-	@Override
-	public void before(Match match, Result result) {
-		testMethod.hooks.add(result);
-	}
-
-	@Override
-	public void background(Background background) {
 	}
 
 	@Override
@@ -128,35 +99,55 @@ class CucumberReporter implements Formatter, Reporter {
 	}
 
 	@Override
+	public void scenarioOutline(ScenarioOutline scenarioOutline) {
+		iteration = 1;
+	}
+
+	@Override
+	public void examples(Examples examples) {
+		tmpExamples = examples;
+	}
+
+	@Override
+	public void startOfScenarioLifeCycle(Scenario scenario) {
+		root = document.createElement("test-method");
+		clazz.appendChild(root);
+		testMethod = new TestMethod(scenario);
+		testMethod.feature = feat;
+		testMethod.hooks = tmpHooks;
+		if (tmpExamples == null) {
+			testMethod.steps = tmpSteps;
+		} else {
+			testMethod.steps = new ArrayList<Step>();
+		}
+		testMethod.examplesData = tmpExamples;
+		testMethod.start(root, iteration);
+		iteration++;
+	}
+
+	@Override
+	public void background(Background background) {
+	}
+
+	@Override
 	public void step(Step step) {
-		testMethod.steps.add(step);
-	}
-
-	@Override
-	public void match(Match match) {
-	}
-
-	@Override
-	public void result(Result result) {
-		testMethod.results.add(result);
-	}
-
-	@Override
-	public void embedding(String mimeType, byte[] data) {
-	}
-
-	@Override
-	public void write(String text) {
-	}
-
-	@Override
-	public void after(Match match, Result result) {
-		testMethod.hooks.add(result);
+		if (step.getClass().toString().contains("ExampleStep")) {
+			testMethod.steps.add(step);
+		} else {
+			tmpSteps.add(step);
+		}
 	}
 
 	@Override
 	public void endOfScenarioLifeCycle(Scenario scenario) {
-		testMethod.finish(document, root);
+		testMethod.finish(document, root, position);
+		position++;
+		if (iteration >= tmpExamples.getRows().size()) {
+			tmpExamples = null;
+		}
+		tmpHooks.clear();
+		tmpSteps.clear();
+		testMethod = null;
 	}
 
 	@Override
@@ -200,6 +191,34 @@ class CucumberReporter implements Formatter, Reporter {
 	public void close() {
 	}
 
+	// Reporter methods
+	@Override
+	public void before(Match match, Result result) {
+		tmpHooks.add(result);
+	}
+
+	@Override
+	public void match(Match match) {
+	}
+
+	@Override
+	public void result(Result result) {
+		testMethod.results.add(result);
+	}
+
+	@Override
+	public void embedding(String mimeType, byte[] data) {
+	}
+
+	@Override
+	public void write(String text) {
+	}
+
+	@Override
+	public void after(Match match, Result result) {
+		testMethod.hooks.add(result);
+	}
+
 	private int getElementsCountByAttribute(Node node, String attributeName,
 			String attributeValue) {
 		int count = 0;
@@ -217,7 +236,6 @@ class CucumberReporter implements Formatter, Reporter {
 				count++;
 			}
 		}
-
 		return count;
 	}
 
@@ -243,48 +261,42 @@ class CucumberReporter implements Formatter, Reporter {
 
 	private static class TestMethod {
 
-		Feature feature;
+		Feature feature = null;
+		Scenario scenario = null;
 		Examples examplesData;
 		static boolean treatSkippedAsFailure = false;
-		final List<Step> steps = new ArrayList<Step>();
+		List<Step> steps; // = new ArrayList<Step>();
 		final List<Result> results = new ArrayList<Result>();
-		final List<Result> hooks = new ArrayList<Result>();
+		List<Result> hooks;// = new ArrayList<Result>();
 		Integer iteration = 1;
 
-		List<Step> simplifiedSteps = null;
-		List<Result> simplifiedResults = null;
-
-		private TestMethod(ScenarioOutline scenarioOutline) {
-		}
-
 		private TestMethod(Scenario scenario) {
+			this.scenario = scenario;
 		}
 
 		private void start(Element element, Integer iteration) {
 			this.iteration = iteration;
-			ThreadProperty.set("dataSet", examplesData.getRows().get(iteration)
-					.getCells().toString());
-			element.setAttribute("name", feature.getName()
-					+ " "
-					+ examplesData.getRows().get(iteration).getCells()
-							.toString() + " " + ThreadProperty.get("browser"));
+			if ((examplesData == null)
+					|| (this.iteration >= examplesData.getRows().size())) {
+				ThreadProperty.set("dataSet", "");
+				element.setAttribute("name", scenario.getName() + " "
+						+ ThreadProperty.get("browser"));
+			} else {
+				ThreadProperty.set("dataSet",
+						examplesData.getRows().get(iteration).getCells()
+								.toString());
+				element.setAttribute(
+						"name",
+						scenario.getName()
+								+ " "
+								+ examplesData.getRows().get(iteration)
+										.getCells().toString() + " "
+								+ ThreadProperty.get("browser"));
+			}
 			element.setAttribute("started-at", DATE_FORMAT.format(new Date()));
 		}
 
-		public void finish(Document doc, Element element) {
-			Integer definitionSteps = 0;
-			for (int i = 0; i < steps.size(); i++) {
-				if (steps.get(i).getClass().toString()
-						.contains("gherkin.formatter.model.Step")) {
-					definitionSteps++;
-				}
-			}
-			simplifiedSteps = new ArrayList<Step>(steps.subList(iteration
-					* definitionSteps, (iteration * definitionSteps)
-					+ definitionSteps));
-			simplifiedResults = new ArrayList<Result>(results.subList(
-					(iteration - 1) * definitionSteps, iteration
-							* definitionSteps));
+		public void finish(Document doc, Element element, Integer position) {
 
 			element.setAttribute("duration-ms", calculateTotalDurationString());
 			element.setAttribute("finished-at", DATE_FORMAT.format(new Date()));
@@ -295,7 +307,7 @@ class CucumberReporter implements Formatter, Reporter {
 			Result failed = null;
 			Result passedWithWarn = null;
 
-			for (Result result : simplifiedResults) {
+			for (Result result : results) {
 				if ("failed".equals(result.getStatus())) {
 					failed = result;
 				} else if ("undefined".equals(result.getStatus())
@@ -334,7 +346,7 @@ class CucumberReporter implements Formatter, Reporter {
 			} else if (passedWithWarn != null) {
 				element.setAttribute("status", "PASS");
 				element.setAttribute("warn", "TRUE");
-				for (Result result : simplifiedResults) {
+				for (Result result : results) {
 					StringWriter stringWriter = new StringWriter();
 					if ((result.getError() != null)
 							&& "passed".equals(result.getStatus())) {
@@ -353,7 +365,8 @@ class CucumberReporter implements Formatter, Reporter {
 
 			ResultsBackend results = ResultsBackend.getInstance();
 			results.addScenarioResult(ThreadProperty.get("class"),
-					feature.getName(), ThreadProperty.get("browser"),
+					feature.getName(), position, scenario.getName(),
+					ThreadProperty.get("browser"),
 					ThreadProperty.get("dataSet"),
 					element.getAttribute("status"),
 					element.getAttribute("warn"));
@@ -361,7 +374,7 @@ class CucumberReporter implements Formatter, Reporter {
 
 		private String calculateTotalDurationString() {
 			long totalDurationNanos = 0;
-			for (Result r : simplifiedResults) {
+			for (Result r : results) {
 				totalDurationNanos += r.getDuration() == null ? 0 : r
 						.getDuration();
 			}
@@ -374,17 +387,17 @@ class CucumberReporter implements Formatter, Reporter {
 
 		private void addStepAndResultListing(StringBuilder sb) {
 
-			for (int i = 0; i < simplifiedSteps.size(); i++) {
+			for (int i = 0; i < steps.size(); i++) {
 				int length = sb.length();
 				String resultStatus = "not executed";
 				String resultStatusWarn = "*";
-				if (i < simplifiedResults.size()) {
-					resultStatus = simplifiedResults.get(i).getStatus();
-					resultStatusWarn = (simplifiedResults.get(i).getError() != null) ? "*"
+				if (i < results.size()) {
+					resultStatus = results.get(i).getStatus();
+					resultStatusWarn = (results.get(i).getError() != null) ? "\uD83D\uDC7D"
 							: "";
 				}
-				sb.append(simplifiedSteps.get(i).getKeyword());
-				sb.append(simplifiedSteps.get(i).getName());
+				sb.append(steps.get(i).getKeyword());
+				sb.append(steps.get(i).getName());
 				do {
 					sb.append(".");
 				} while (sb.length() - length < 106);

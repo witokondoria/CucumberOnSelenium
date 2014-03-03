@@ -39,12 +39,12 @@ public class SeleniumAspect {
 		} catch (WebDriverException wex) {
 			newEx = treatException(pjp, wex);
 			throw newEx;
-		} 
+		}
 	}
 
 	public Throwable treatException(ProceedingJoinPoint pjp, Throwable ex)
 			throws Exception {
-		
+
 		String cap = captureScreen(pjp);
 		String BUILD_URL = System.getenv().get("BUILD_URL");
 
@@ -66,13 +66,15 @@ public class SeleniumAspect {
 				+ ((RemoteWebDriver) driver).getCapabilities().getVersion();
 		String currentData = ThreadProperty.get("dataSet");
 
-		currentData = currentData.replaceAll("[\\\\|\\/|\\|\\s|:]", "_");
-		
+		if (!currentData.equals("")) {
+			currentData = currentData.replaceAll("[\\\\|\\/|\\|\\s|:]", "_");
+		}
+
 		String outputFile = dir + clazz + "/" + currentBrowser + "-"
-				+ currentData + ".png";		
-		
+				+ currentData + ".png";
+
 		outputFile = outputFile.replaceAll(" ", "_");
-		
+
 		File file = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 		try {
 			FileUtils.copyFile(file, new File(outputFile));

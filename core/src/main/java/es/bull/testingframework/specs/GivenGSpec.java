@@ -16,7 +16,7 @@ public class GivenGSpec extends BaseSpec {
 	public void browseTo(String url) {
 		commonspec.getLogger().info("{}: Browsing to {}",
 				commonspec.getShortBrowser(), url);
-		if (!url.startsWith("https://") && !url.startsWith("http://")) {
+		if (!url.startsWith("http")) {
 			commonspec.getLogger().info("{}: Appending transport protocol to url",
 					commonspec.getShortBrowser(), url);
 			url = "http://" + url;

@@ -15,10 +15,11 @@ import org.testng.TestListenerAdapter;
 public class ExecutiveResultsReporter extends TestListenerAdapter {
 
 	public String toImgTag(String browser) {
-		
+
 		ResultsBackend results = ResultsBackend.getInstance();
 		String webcontext = results.getContext();
-		return "<img src='" + webcontext + "/userContent/cucumber/" + browser + ".png'>";
+		return "<img src='" + webcontext + "/userContent/cucumber/" + browser
+				+ ".png'>";
 	}
 
 	@Override
@@ -47,17 +48,23 @@ public class ExecutiveResultsReporter extends TestListenerAdapter {
 
 			ResultsBackend results = ResultsBackend.getInstance();
 			String webcontext = results.getContext();
-			
-			writer.append("<script src='" + webcontext + "/userContent/cucumber/jquery-1.11.0.min.js' type='text/javascript'></script>\n");			
-			writer.append("<link rel='stylesheet' href='" + webcontext + "/userContent/cucumber/jquery.fancybox.css' type='text/css' media='screen' />\n");
-		    writer.append("<script type='text/javascript' src='" + webcontext + "/userContent/cucumber/jquery.fancybox.pack.js'></script>\n");
-		    writer.flush();
-			
-			len = 0;			
+
+			writer.append("<script src='"
+					+ webcontext
+					+ "/userContent/cucumber/jquery-1.11.0.min.js' type='text/javascript'></script>\n");
+			writer.append("<link rel='stylesheet' href='"
+					+ webcontext
+					+ "/userContent/cucumber/jquery.fancybox.css' type='text/css' media='screen' />\n");
+			writer.append("<script type='text/javascript' src='"
+					+ webcontext
+					+ "/userContent/cucumber/jquery.fancybox.pack.js'></script>\n");
+			writer.flush();
+
+			len = 0;
 			while ((len = template2.read(buffer)) != -1) {
 				fos.write(buffer, 0, len);
 			}
-			
+
 			writer.append("  <table id='results'>\n");
 
 			ArrayList<String> browsers = results.getSortedUniqueBrowsers();
@@ -89,42 +96,51 @@ public class ExecutiveResultsReporter extends TestListenerAdapter {
 				Integer browserCount = 1;
 				for (String browser : browsers) {
 					browserCount++;
-					String thisResult = results.getExecutionResults(clazz,
+					String exampleResult = results.getExecutionResults(clazz,
 							browser);
 					String thisColor = "";
-					if (thisResult.equals("-")) {
+					if (exampleResult.equals("-")) {
 						thisColor = "rgba(175, 162, 162, 0.39)";
-					} else if (thisResult.split(":")[1].startsWith("0")) { // ok
+					} else if (exampleResult.split(":")[1].startsWith("0")) { // ok
 						thisColor = "rgba(153, 198, 142, 0.39)";
-					} else if (thisResult.split(":")[0].startsWith("0")) { // err
+					} else if (exampleResult.split(":")[0].startsWith("0")) { // err
 						thisColor = "rgba(247, 13, 26, 0.39)";
 					} else {
 						thisColor = "rgba(248, 240, 49, 0.39)";
 					}
-					if (!thisResult.equals("-")) {
-						thisResult = thisResult.split("/")[1];
+					if (!exampleResult.equals("-")) {
+						exampleResult = exampleResult.split("/")[1];
 					}
 					writer.append("      <td style='background-color:"
-							+ thisColor + ";'>" + thisResult + "</td>\n");
+							+ thisColor + ";'>" + exampleResult + "</td>\n");					
 				}
 				writer.append("    </tr>\n");
 				writer.append("    <tr class='detailedresults'><td class='nomargin' colspan='"
 						+ browserCount + "'>\n");
-
 				writer.append("<table class='details' >\n");
-				for (String data : results.getUniqueData(clazz)) {
+
+				for (String scenario : results.getScenarios(clazz)) {
 					writer.append("<tr>\n");
-					writer.append("<td class='feature details' >\n");
-					writer.append(data + "\n");
+					writer.append("<td class='scenario' colspan='50' >\n");
+					writer.append(scenario + "\n");
 					writer.append("</td>\n");
-					for (String browser : browsers) {
-						writer.append("<td>\n");
-						writer.append(results.getExecutionResults(clazz, data,
-								browser, feature) + "\n");
-						writer.append("</td>\n");
-					}
 					writer.append("</tr>\n");
+					
+					for (String data : results.getData(clazz, scenario)) {
+						writer.append("<tr>\n");
+						writer.append("<td class='details' >\n");
+						writer.append(data + "\n");
+						writer.append("</td>\n");
+						for (String browser : browsers) {
+							writer.append("<td>\n");
+							writer.append(results.getExecutionResults(clazz, scenario,
+									data, browser, feature) + "\n");
+							writer.append("</td>\n");
+						}
+						writer.append("</tr>\n");
+					}
 				}
+
 				writer.append("</table>\n");
 				writer.append("    </td></tr>\n");
 			}
