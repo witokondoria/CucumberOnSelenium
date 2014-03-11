@@ -393,7 +393,7 @@ class CucumberReporter implements Formatter, Reporter {
 				String resultStatusWarn = "*";
 				if (i < results.size()) {
 					resultStatus = results.get(i).getStatus();
-					resultStatusWarn = (results.get(i).getError() != null) ? "\uD83D\uDC7D"
+					resultStatusWarn = ((results.get(i).getError() != null) && (results.get(i).getStatus().equals("passed"))) ? "(W)"
 							: "";
 				}
 				sb.append(steps.get(i).getKeyword());

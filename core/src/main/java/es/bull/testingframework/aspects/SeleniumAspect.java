@@ -1,7 +1,11 @@
 package es.bull.testingframework.aspects;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 
 import org.apache.commons.io.FileUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -45,15 +49,21 @@ public class SeleniumAspect {
 	public Throwable treatException(ProceedingJoinPoint pjp, Throwable ex)
 			throws Exception {
 
-		String cap = captureScreen(pjp);
+		String cap = captureEvidence(pjp, "screenCapture");
+		String html = captureEvidence(pjp, "htmlSource");
+
 		String BUILD_URL = System.getenv().get("BUILD_URL");
 
 		String capURL = "\n" + BUILD_URL + "artifact/" + cap + " \n\n";
-		Throwable newEx = new Throwable(capURL + ex.getMessage(), ex);
+		String htmlURL = "\n" + BUILD_URL + "artifact/" + html + " \n\n";
+
+		Throwable newEx = new Throwable(capURL + "\n" + htmlURL + "\n"
+				+ ex.getMessage(), ex);
 		return newEx;
 	}
 
-	private String captureScreen(ProceedingJoinPoint pjp) throws Exception {
+	private String captureEvidence(ProceedingJoinPoint pjp, String type)
+			throws Exception {
 
 		BaseSpec spec = (BaseSpec) pjp.getThis();
 		WebDriver driver = spec.getCommonSpec().getDriver();
@@ -71,15 +81,30 @@ public class SeleniumAspect {
 		}
 
 		String outputFile = dir + clazz + "/" + currentBrowser + "-"
-				+ currentData + ".png";
-
+				+ currentData;
 		outputFile = outputFile.replaceAll(" ", "_");
 
-		File file = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-		try {
-			FileUtils.copyFile(file, new File(outputFile));
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (type.equals("screenCapture")) {
+			outputFile = outputFile + ".png";
+			File file = ((TakesScreenshot) driver)
+					.getScreenshotAs(OutputType.FILE);
+			try {
+				FileUtils.copyFile(file, new File(outputFile));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else if (type.equals("htmlSource")) {
+			outputFile = outputFile + ".html";
+			String source = ((RemoteWebDriver) driver).getPageSource();
+
+			File fout = new File(outputFile);
+			fout.getParentFile().mkdirs();
+			FileOutputStream fos = new FileOutputStream(fout, true);
+
+			Writer out = new OutputStreamWriter(fos, "UTF8");
+			PrintWriter writer = new PrintWriter(out, false);
+			writer.append(source);
+			out.close();
 		}
 		return outputFile;
 	}

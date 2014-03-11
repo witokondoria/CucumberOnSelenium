@@ -78,6 +78,67 @@ public class CommonSpec {
 		this.startTS = startTS;
 	}
 
+	/**
+	 * Returns a List of WebElement, containing every element with a common
+	 * ancestor (parent parameter), each element with a html tag equal to the
+	 * second parameter.
+	 * 
+	 * @param parent
+	 *            a previously found webelement. Start point to look for
+	 *            children.
+	 * @param tag
+	 *            children tags to look for. Possible values: "*" or a tag name
+	 * @return a list (maybe empty) of webelements.
+	 */
+	public List<WebElement> locateElements(WebElement parent, String tag) {
+		List<WebElement> elems = null;
+		this.getLogger().info("{}: Locating elements", this.getShortBrowser());
+
+		elems = locateElements(parent, tag, "", "");
+		return elems;
+	}
+
+	/**
+	 * Returns a List of WebElement, containing every element with a common
+	 * ancestor (parent parameter), each element with a html tag equal to the
+	 * second parameter. Each return value has the specified attribute-value
+	 * 
+	 * @param parent
+	 *            a previously found webelement. Start point to look for
+	 *            children.
+	 * @param tag
+	 *            children tags to look for. Possible values: "*" or a tag name
+	 * @param attrib
+	 *            previous tag attribute to filter with
+	 * @param value
+	 *            previous attribute value to filter with
+	 * @return a list (maybe empty) of webelements.
+	 */
+	public List<WebElement> locateElements(WebElement parent, String tag,
+			String attrib, String value) {
+		List<WebElement> elems = null;
+		String attribValue = "[@=" + attrib + "'" + value + "']";
+
+		this.getLogger().info("{}: Locating elements", this.getShortBrowser());
+		if (attrib.equals("")) {
+			elems = parent.findElements(By.xpath(".//" + tag));
+		} else {
+			elems = parent.findElements(By.xpath(".//" + tag + attribValue));
+		}
+		return elems;
+	}
+
+	/**
+	 * Returns a List of WebElement, containing every element matching the
+	 * provided attribute-value paramenters. Lookup is done at the current
+	 * webdriver object
+	 * 
+	 * @param attrib
+	 *            kind of locator to use. Has to matche id, name, class or xpath
+	 * @param value
+	 *            string be used by the locator previously selected
+	 * @return a list (maybe empty) of webelements.
+	 */
 	public List<WebElement> locateElements(String attrib, String value) {
 		List<WebElement> elems = null;
 
@@ -164,5 +225,16 @@ public class CommonSpec {
 				startHeight, eleWidth, eleHeight);
 
 		return eleScreenshot;
+	}
+
+	public String valueOrText(WebElement elem) {
+		String actual = "";
+		
+		if (elem.getTagName().equals("input")) {
+			actual = elem.getAttribute("value");
+		} else {
+			actual = elem.getText();
+		}
+		return actual;
 	}
 }

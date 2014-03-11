@@ -1,7 +1,5 @@
 package es.bull.testingframework.specs;
 
-import org.openqa.selenium.By;
-
 import cucumber.api.java.en.Given;
 import cucumber.api.java.es.Dado;
 
@@ -11,8 +9,8 @@ public class GivenGSpec extends BaseSpec {
 		this.commonspec = spec;
 	}
 
-	@Given("^I browse to \"(.+?)\"$")
-	@Dado("^que navego a \"(.+?)\"$")
+	@Given("^I browse to '(.+?)'$")
+	@Dado("^que navego a '(.+?)'$")
 	public void browseTo(String url) {
 		commonspec.getLogger().info("{}: Browsing to {}",
 				commonspec.getShortBrowser(), url);
@@ -25,8 +23,10 @@ public class GivenGSpec extends BaseSpec {
 		commonspec.getDriver().get(url);
 	}
 	
-	@Given("^I dummy find$")	
-	public void dummy(String url) {		
-		commonspec.getDriver().findElement(By.id("dummy"));
+	@Given("^I close the browser$")
+	@Dado("^que cierro el navegador$")
+	public void browserClose(String url) {
+		commonspec.getLogger().info("{}: Closing browser", commonspec.getShortBrowser());
+		commonspec.getDriver().quit();
 	}
 }
