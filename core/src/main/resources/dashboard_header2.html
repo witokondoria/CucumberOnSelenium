@@ -1,63 +1,114 @@
-<script type="text/javascript">  	
-		function afterLoading(current, previous) {
-			$("iframe.fancybox-iframe").contents().find("#side-panel").hide();
-			$("iframe.fancybox-iframe").contents().find("#header").hide();
-			$("iframe.fancybox-iframe").contents().find("#footer").hide();		
-		}
-		
-		function afterShowing() {
-			$("iframe.fancybox-iframe").contents().find("#map").find("area").bind("click", doInterceptClickArea);			
-			$("iframe.fancybox-iframe").contents().find("a").bind("click", doInterceptClickA);			
-		}
-		
-		var doInterceptClickA = function (e) {
-			e.target.setAttribute("target", "_blank");
-		}
+<script type="text/javascript">      
+    function afterLoading(current, previous) {
+        $("iframe.fancybox-iframe").contents().find("#side-panel").hide();
+        $("iframe.fancybox-iframe").contents().find("#header").hide();
+        $("iframe.fancybox-iframe").contents().find("#footer").hide();        
+    }
+        
+    function afterShowing() {
+        $("iframe.fancybox-iframe").contents().find("#map").find("area").bind("click", doInterceptClickArea);            
+        $("iframe.fancybox-iframe").contents().find("a").bind("click", doInterceptClickA);            
+    }
+    
+    var doInterceptClickA = function (e) {
+        e.target.setAttribute("target", "_blank");
+    }
 
-		var doInterceptClickArea = function (e) {
-			console.log("clicked an area");
-			e.preventDefault();
-			var link = $(this).attr("href");
-			$.fancybox.open({
-				href: link,
-				type: 'iframe',
-				fitToView: false,
-				autoSize: false,
-				autoDimensions: false,
-				width: 850,
-				height: 600,
-				afterLoad: function(current, previous) {					
-					afterLoading (current, previous);
-				},
-				afterShow: function() {					
-					afterShowing();
-				},
-			});						
-		}
-				
-        $(document).ready(function(){
-            $("#results tr.results").addClass("odd");
-            $("#results tr.detailedresults").hide();
-            $("#results tr.results:first-child").show();     
-			$('.fancybox').fancybox({
-				fitToView: false,
-				autoSize: false,
-				autoDimensions: false,
-				width: 850,
-				height: 600,
-				afterLoad: function(current, previous) {					
-					afterLoading(current, previous);			
-				},
-				afterShow: function() {				
-					afterShowing();
-				},	
-			});
+    var doInterceptClickArea = function (e) {
+        console.log("clicked an area");
+        e.preventDefault();
+        var link = $(this).attr("href");
+        $.fancybox.open({
+            href: link,
+            type: 'iframe',
+            fitToView: false,
+            autoSize: false,
+            autoDimensions: false,
+            width: 850,
+            height: 600,
+            afterLoad: function(current, previous) {                    
+                afterLoading (current, previous);
+            },
+            afterShow: function() {                    
+                afterShowing();
+            },
+        });                        
+    }
+    
+    function parseURLString(){
+      var sParam = window.location.search.substring(1);
+      var sParameterValue = sParam.split('=');
+      if ((sParameterValue[0] == "groups") && (sParameterValue[1].length > 0)){
+        var sValues = sParameterValue[1].split(',');
+		$.each( $("tr.group"), function( k, v ) {
+		   this.click();
+		});
+        $.each( $("tr.group"), function( k, v ) {
+            var gclass = this.classList;
+			var agclass = gclass.toString().split(' ');
+     		var igroup = agclass.indexOf("group");
+     		agclass.splice(igroup, 1);
+			igroup = agclass.indexOf("hiddenGroup");
+			agclass.splice(igroup, 1);
+			if (sParameterValue[1].indexOf(agclass) >= 0) {
+		     this.click();
+		    } 
+		});
+      }
+    }     
+            
+    $(document).ready(function(){     
+        $("#results tr.results").addClass("odd");
+        $("#results tr.detailedresults").hide();
+        $("#results tr.results:first-child").show();     
+        $('.fancybox').fancybox({
+            fitToView: false,
+            autoSize: false,
+            autoDimensions: false,
+            width: 850,
+            height: 600,
+            afterLoad: function(current, previous) {                    
+                afterLoading(current, previous);            
+            },
+            afterShow: function() {                
+                afterShowing();
+            },    
+        });
+     
+        $("tr.group").click(function(){
+     		var gclass = this.classList;
+			var agclass = gclass.toString().split(' ');
+     		var igroup = agclass.indexOf("group");
+     		agclass.splice(igroup, 1);
 			
-            $("#results tr.results > td:not(.feature)").click(function(){
-				$("#results tr.detailedresults").hide();
-                $(this).parent().next("tr").toggle();
+			if (agclass.indexOf("hiddenGroup") >= 1) {
+			   hidden = false;
+     	       $(this).removeClass("hiddenGroup");
+     		}
+     		else {
+			   hidden = true;
+     		   $(this).addClass("hiddenGroup");
+     		}
+			
+     		$("#results tr.detailedresults").hide();
+     		$.each( agclass, function( k, v ) {
+			     if ((agclass.indexOf(v) >= 0) && (hidden)){
+				     $("#results tr.results." + v).hide();
+				 }
+				 else if ((agclass.indexOf(v) >= 0) && !(hidden)){
+				     $("#results tr.results." + v).show();
+				 }
             });
-	     });
-    </script>
-	</head>
-	
+        });
+            
+        $("#results tr.results > td:not(.feature)").click(function(){
+            $("#results tr.detailedresults").hide();
+            $(this).parent().next("tr").toggle();
+        });
+        
+        parseURLString();
+        
+     });
+</script>
+</head>
+    

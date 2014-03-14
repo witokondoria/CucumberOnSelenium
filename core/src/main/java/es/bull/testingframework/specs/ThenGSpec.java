@@ -27,8 +27,8 @@ public class ThenGSpec extends BaseSpec {
 		this.commonspec = spec;
 	}
 
-	@Then("^load time has to be under '(\\d+)' seconds( \\(WARN otherwise\\))$")
-	@Entonces("^el tiempo transcurrido ha de ser menor a '(\\d+)' segundos( \\(WARN en otro caso\\))$")
+	@Then("^load time has to be under '(\\d+)' seconds( \\(WARN otherwise\\))?$")
+	@Entonces("^el tiempo transcurrido ha de ser menor a '(\\d+)' segundos( \\(WARN en otro caso\\))?$")
 	public void assertElapsedLoadTime(Integer seconds,
 			@Transform(WarnBooleanConverter.class) Boolean warn) {
 		commonspec.getLogger().info("{}: Verifying load time",
@@ -46,8 +46,8 @@ public class ThenGSpec extends BaseSpec {
 		}
 	}
 
-	@Then("^there (?:is|are) '(\\d)' elements? with attribute '(.*?)' and value '(.*?)'( \\(WARN otherwise\\))$")
-	@Entonces("^existen? '(\\d+)' elementos? con atributo '(.*?)' y valor '(.*?)'( \\(WARN en otro caso\\))$")
+	@Then("^there (?:is|are) '(\\d)' elements? with attribute '(.*?)' and value '(.*?)'( \\(WARN otherwise\\))?$")
+	@Entonces("^existen? '(\\d+)' elementos? con atributo '(.*?)' y valor '(.*?)'( \\(WARN en otro caso\\))?$")
 	public void assertElementsExists(Integer expectedCount, String attrib,
 			String value, @Transform(WarnBooleanConverter.class) Boolean warn) {
 		commonspec.getLogger().info("{}: Verifying element(s) existance",
@@ -64,8 +64,8 @@ public class ThenGSpec extends BaseSpec {
 		commonspec.setCurrentElements(elems);
 	}
 
-	@Then("^there (?:is|are)n't '(\\d)' elements? with attribute '(.*?)' and value '(.*?)'( \\(WARN otherwise\\))$")
-	@Entonces("^no existen? '(\\d+)' elementos? con atributo '(.*?)' y valor '(.*?)'( \\(WARN en otro caso\\))$")
+	@Then("^there (?:is|are)n't '(\\d)' elements? with attribute '(.*?)' and value '(.*?)'( \\(WARN otherwise\\))?$")
+	@Entonces("^no existen? '(\\d+)' elementos? con atributo '(.*?)' y valor '(.*?)'( \\(WARN en otro caso\\))?$")
 	public void assertElementsDoesntExists(Integer expectedCount,
 			String attrib, String value,
 			@Transform(WarnBooleanConverter.class) Boolean warn) {
@@ -82,8 +82,8 @@ public class ThenGSpec extends BaseSpec {
 		}
 	}
 
-	@Then("^there (?:is|are) more than '(\\d)' elements? with attribute '(.*?)' and value '(.*?)'( \\(WARN otherwise\\))$")
-	@Entonces("^existen? mas de '(\\d+)' elementos? con atributo '(.*?)' y valor '(.*?)'( \\(WARN en otro caso\\))$")
+	@Then("^there (?:is|are) more than '(\\d)' elements? with attribute '(.*?)' and value '(.*?)'( \\(WARN otherwise\\))?$")
+	@Entonces("^existen? mas de '(\\d+)' elementos? con atributo '(.*?)' y valor '(.*?)'( \\(WARN en otro caso\\))?$")
 	public void assertMoreThanNElementsExists(Integer expectedCount,
 			String attrib, String value,
 			@Transform(WarnBooleanConverter.class) Boolean warn) {
@@ -100,8 +100,8 @@ public class ThenGSpec extends BaseSpec {
 		commonspec.setCurrentElements(elems);
 	}
 
-	@Then("^there (?:is|are) less than '(\\d)' elements? with attribute '(.*?)' and value '(.*?)'( \\(WARN otherwise\\))$")
-	@Entonces("^existen? menos de '(\\d+)' elementos? con atributo '(.*?)' y valor '(.*?)'( \\(WARN en otro caso\\))$")
+	@Then("^there (?:is|are) less than '(\\d)' elements? with attribute '(.*?)' and value '(.*?)'( \\(WARN otherwise\\))?$")
+	@Entonces("^existen? menos de '(\\d+)' elementos? con atributo '(.*?)' y valor '(.*?)'( \\(WARN en otro caso\\))?$")
 	public void assertLessThanNElementsExists(Integer expectedCount,
 			String attrib, String value,
 			@Transform(WarnBooleanConverter.class) Boolean warn) {
@@ -119,8 +119,8 @@ public class ThenGSpec extends BaseSpec {
 		commonspec.setCurrentElements(elems);
 	}
 
-	@Then("^there (?:is|are) '(\\d)' or more elements with attribute '(.*?)' and value '(.*?)'( \\(WARN otherwise\\))$")
-	@Entonces("^existen? '(\\d+)' elementos? o mas con atributo '(.*?)' y valor '(.*?)'( \\(WARN en otro caso\\))$")
+	@Then("^there (?:is|are) '(\\d)' or more elements with attribute '(.*?)' and value '(.*?)'( \\(WARN otherwise\\))?$")
+	@Entonces("^existen? '(\\d+)' elementos? o mas con atributo '(.*?)' y valor '(.*?)'( \\(WARN en otro caso\\))?$")
 	public void assertMoreThanEqualNElementsExists(Integer expectedCount,
 			String attrib, String value,
 			@Transform(WarnBooleanConverter.class) Boolean warn) {
@@ -138,8 +138,8 @@ public class ThenGSpec extends BaseSpec {
 		commonspec.setCurrentElements(elems);
 	}
 
-	@Then("^there (?:is|are) '(\\d+)' or less elements? with attribute '(.*?)' and value '(.*?)'( \\(WARN otherwise\\))$")
-	@Entonces("^existen? '(\\d+)' elementos? o menos con atributo '(.*?)' y valor '(.*?)'( \\(WARN en otro caso\\))$")
+	@Then("^there (?:is|are) '(\\d+)' or less elements? with attribute '(.*?)' and value '(.*?)'( \\(WARN otherwise\\))?$")
+	@Entonces("^existen? '(\\d+)' elementos? o menos con atributo '(.*?)' y valor '(.*?)'( \\(WARN en otro caso\\))?$")
 	public void assertLessThanEqualNElementsExists(Integer expectedCount,
 			String attrib, String value,
 			@Transform(WarnBooleanConverter.class) Boolean warn) {
@@ -157,8 +157,8 @@ public class ThenGSpec extends BaseSpec {
 		commonspec.setCurrentElements(elems);
 	}
 
-	@And("^has '(\\d+)' child(?:ren)? elements?( \\(WARN otherwise\\))$")
-	@Y("^tiene '(\\d+)' elementos? hijos?( \\(WARN en otro caso\\))$")
+	@And("^has '(\\d+)' child(?:ren)? elements?( \\(WARN otherwise\\))?$")
+	@Y("^tiene '(\\d+)' elementos? hijos?( \\(WARN en otro caso\\))?$")
 	public void assertHasNChildren(Integer expectedChildren,
 			@Transform(WarnBooleanConverter.class) Boolean warn) {
 		commonspec.getLogger().info("{}: Verifying children count",

@@ -1,20 +1,28 @@
 package es.bull.testingframework.cucumber.testng;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import org.testng.ITestContext;
+import org.testng.ITestNGMethod;
 import org.testng.TestListenerAdapter;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.Version;
 
 public class ExecutiveResultsReporter extends TestListenerAdapter {
 
-	public String toImgTag(String browser) {
+	private String toImgTag(String browser) {
 
 		ResultsBackend results = ResultsBackend.getInstance();
 		String webcontext = results.getContext();
@@ -22,134 +30,296 @@ public class ExecutiveResultsReporter extends TestListenerAdapter {
 				+ ".png'>";
 	}
 
+	private ArrayList<String> getGroupsForClass(String clazz,
+			ITestContext context) {
+
+		ArrayList<String> response = new ArrayList<String>();
+		Map<String, Collection<ITestNGMethod>> MethodsGroups = context
+				.getSuite().getMethodsByGroups();
+
+		for (Map.Entry<String, Collection<ITestNGMethod>> entry : MethodsGroups
+				.entrySet()) {
+			for (ITestNGMethod method : entry.getValue()) {
+				if (method.getTestClass().toString().contains(clazz)) {
+					response.add(entry.getKey());
+				}
+			}
+		}
+		return response;
+	}
+
+	public class Browser {
+		private String name;
+		private String version;
+
+		public Browser(String name, String version) {
+			this.name = name;
+			this.version = version;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getVersion() {
+			return version;
+		}
+	}
+
+	public class Group {
+		private String name;
+		private String hsl;
+
+		public Group(String name, String hsl) {
+			this.name = name;
+			this.hsl = hsl;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getHsl() {
+			return hsl;
+		}
+	}
+
+	public class BrowserResult {
+		private String status;
+		private String summary;
+
+		public BrowserResult(String status, String summary) {
+			this.status = status;
+			this.summary = summary;
+		}
+
+		public String getStatus() {
+			return status;
+		}
+
+		public String getSummary() {
+			return summary;
+		}
+	}
+
+	public class DataResult {
+		private String value;
+		private ArrayList<String> results = new ArrayList<String>();
+
+		public DataResult(String value) {
+			this.value = value;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		public ArrayList<String> getResults() {
+			return results;
+		}
+
+		public void addResult(String res) {
+			results.add(res);
+		}
+	}
+
+	public class ScenarioResult {
+		private String name;
+		private ArrayList<DataResult> dataResults = new ArrayList<DataResult>();
+
+		public ScenarioResult(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public ArrayList<DataResult> getDataResults() {
+			return dataResults;
+		}
+
+		public void addDataResult(DataResult data) {
+			dataResults.add(data);
+		}
+	}
+
+	public class Feature {
+		private String name;
+		private ArrayList<Group> groups = new ArrayList<Group>();
+		private String classPackage;
+		private String buildUrl = "";
+		private String clazz;
+		private ArrayList<BrowserResult> browserResults = new ArrayList<BrowserResult>();
+		private ArrayList<ScenarioResult> scenarioResults = new ArrayList<ScenarioResult>();
+
+		public Feature(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public ArrayList<Group> getGroups() {
+			return groups;
+		}
+
+		public void addGroup(Group gr) {
+			groups.add(gr);
+		}
+
+		public String getClassPackage() {
+			return classPackage;
+		}
+
+		public void setClassPackage(String classPackage) {
+			this.classPackage = classPackage;
+		}
+
+		public String getBuildUrl() {
+			return buildUrl;
+		}
+
+		public void setBuildUrl(String buildUrl) {
+			if (buildUrl != null) {
+				this.buildUrl = buildUrl;
+			}
+		}
+
+		public String getClazz() {
+			return clazz;
+		}
+
+		public void setClazz(String clazz) {
+			this.clazz = clazz;
+		}
+
+		public ArrayList<BrowserResult> getBrowserResults() {
+			return browserResults;
+		}
+
+		public void addBrowserResult(BrowserResult br) {
+			browserResults.add(br);
+		}
+
+		public ArrayList<ScenarioResult> getScenarioResults() {
+			return scenarioResults;
+		}
+
+		public void addScenarioResult(ScenarioResult sr) {
+			scenarioResults.add(sr);
+		}
+	}
+
 	@Override
 	public void onFinish(ITestContext context) {
+		Configuration cfg = new Configuration();
+		Writer fileWriter;
+		Template template = null;
+		cfg.setClassForTemplateLoading(this.getClass(), "/");
+		try {
+			template = cfg.getTemplate("dashboard.ftl");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		cfg.setIncompatibleImprovements(new Version(2, 3, 20));
+		cfg.setDefaultEncoding("UTF-8");
+
+		Map<String, Object> input = new HashMap<String, Object>();
+
+		List<Group> groupsF = new ArrayList<Group>();
+		for (String group : context.getIncludedGroups()) {
+			Random rand = new Random();
+			String hsl = ((int) (rand.nextInt(24) + 4) * 12) + ", 90%, 50%";
+			Group groupDef = new Group(group, hsl);
+			while (groupsF.contains(groupDef)) {
+				hsl = ((int) (rand.nextInt(24) + 4) * 12) + ", 90%, 50%";
+				groupDef = new Group(group, hsl);
+			}
+			groupsF.add(groupDef);
+		}
+		input.put("groups", groupsF);
+
+		ResultsBackend results = ResultsBackend.getInstance();
+		ArrayList<String> browsers = results.getSortedUniqueBrowsers();
+
+		List<Browser> browserF = new ArrayList<Browser>();
+		for (String browser : browsers) {
+			browserF.add(new Browser(toImgTag(browser.split("_")[0]), browser
+					.split("_")[1]));
+		}
+		input.put("browsers", browserF);
+
+		String webcontext = results.getContext();
+		input.put("webcontext", webcontext);
+		ArrayList<String> classes = results.getSortedUniqueClasses();
+
+		List<Feature> featureF = new ArrayList<Feature>();
+		for (String clazz : classes) {
+			String feature = results.featureForClass(clazz);
+			Feature feat = new Feature(feature);
+
+			feat.setClassPackage(clazz.substring(0, clazz.lastIndexOf(".")));
+			feat.setBuildUrl(System.getenv().get("BUILD_URL"));
+			feat.setClazz(clazz);
+
+			for (String group : getGroupsForClass(clazz, context)) {
+				for (Group gr : groupsF) {
+					if (gr.getName().equals(group)
+							&& !(feat.getGroups().contains(gr))) {
+						feat.addGroup(gr);
+					}
+				}
+			}
+			Integer browserCount = 1;
+			for (String browser : browsers) {
+				browserCount++;
+				String exampleResult = results.getExecutionResults(clazz,
+						browser);
+				if (exampleResult.equals("-")) {
+					feat.addBrowserResult(new BrowserResult("-", "-"));
+				} else if (exampleResult.split(":")[1].startsWith("0")) { // ok
+					feat.addBrowserResult(new BrowserResult("OK",
+							exampleResult = exampleResult.split("/")[1]));
+				} else if (exampleResult.split(":")[0].startsWith("0")) { // err
+					feat.addBrowserResult(new BrowserResult("KO",
+							exampleResult = exampleResult.split("/")[1]));
+				} else {
+					feat.addBrowserResult(new BrowserResult("NOK",
+							exampleResult = exampleResult.split("/")[1]));
+				}
+			}
+
+			input.put("browserCount", browserCount);
+
+			for (String scenario : results.getScenarios(clazz)) {
+				ScenarioResult scenarioF = new ScenarioResult(scenario);
+				for (String data : results.getData(clazz, scenario)) {
+					DataResult dataF = new DataResult(data);
+					for (String browser : browsers) {
+
+						dataF.addResult(results.getExecutionResults(clazz,
+								scenario, data, browser, feature));
+					}
+					scenarioF.addDataResult(dataF);
+				}
+				feat.addScenarioResult(scenarioF);
+			}
+
+			featureF.add(feat);
+		}
+		input.put("features", featureF);
 
 		try {
-			ClassLoader classLoader = Thread.currentThread()
-					.getContextClassLoader();
-			InputStream template1 = classLoader
-					.getResourceAsStream("dashboard_header1.html");
-			InputStream template2 = classLoader
-					.getResourceAsStream("dashboard_header2.html");
-
-			File fout = new File("target/executions/dashboard.html");
-			fout.getParentFile().mkdirs();
-			FileOutputStream fos = new FileOutputStream(fout, true);
-
-			int len = 0;
-			byte[] buffer = new byte[1024];
-			while ((len = template1.read(buffer)) != -1) {
-				fos.write(buffer, 0, len);
-			}
-
-			Writer out = new OutputStreamWriter(fos, "UTF8");
-			PrintWriter writer = new PrintWriter(out, true);
-
-			ResultsBackend results = ResultsBackend.getInstance();
-			String webcontext = results.getContext();
-
-			writer.append("<script src='"
-					+ webcontext
-					+ "/userContent/cucumber/jquery-1.11.0.min.js' type='text/javascript'></script>\n");
-			writer.append("<link rel='stylesheet' href='"
-					+ webcontext
-					+ "/userContent/cucumber/jquery.fancybox.css' type='text/css' media='screen' />\n");
-			writer.append("<script type='text/javascript' src='"
-					+ webcontext
-					+ "/userContent/cucumber/jquery.fancybox.pack.js'></script>\n");
-			writer.flush();
-
-			len = 0;
-			while ((len = template2.read(buffer)) != -1) {
-				fos.write(buffer, 0, len);
-			}
-
-			writer.append("  <table id='results'>\n");
-
-			ArrayList<String> browsers = results.getSortedUniqueBrowsers();
-			ArrayList<String> classes = results.getSortedUniqueClasses();
-
-			writer.append("\t\t<tr>\n");
-			writer.append("\t\t\t<th/>\n");
-			for (String browser : browsers) {
-				writer.append("\t\t\t<th>" + toImgTag(browser.split("_")[0])
-						+ " ");
-				writer.append("<span class='browser'>" + browser.split("_")[1]
-						+ "</span></th>\n");
-			}
-			writer.append("\t\t</tr>\n");
-
-			for (String clazz : classes) {
-				String feature = results.featureForClass(clazz);
-				String classPackage = clazz
-						.substring(0, clazz.lastIndexOf("."));
-				String BUILD_URL = System.getenv().get("BUILD_URL");
-
-				writer.append("    <tr class='results' >\n");
-				writer.append("      <td class='feature'> <a class='fancybox fancybox.iframe' href='"
-						+ BUILD_URL
-						+ "/testngreports/"
-						+ classPackage
-						+ "/"
-						+ clazz + "'>" + feature + "</a></td>\n");
-				Integer browserCount = 1;
-				for (String browser : browsers) {
-					browserCount++;
-					String exampleResult = results.getExecutionResults(clazz,
-							browser);
-					String thisColor = "";
-					if (exampleResult.equals("-")) {
-						thisColor = "rgba(175, 162, 162, 0.39)";
-					} else if (exampleResult.split(":")[1].startsWith("0")) { // ok
-						thisColor = "rgba(153, 198, 142, 0.39)";
-					} else if (exampleResult.split(":")[0].startsWith("0")) { // err
-						thisColor = "rgba(247, 13, 26, 0.39)";
-					} else {
-						thisColor = "rgba(248, 240, 49, 0.39)";
-					}
-					if (!exampleResult.equals("-")) {
-						exampleResult = exampleResult.split("/")[1];
-					}
-					writer.append("      <td style='background-color:"
-							+ thisColor + ";'>" + exampleResult + "</td>\n");					
-				}
-				writer.append("    </tr>\n");
-				writer.append("    <tr class='detailedresults'><td class='nomargin' colspan='"
-						+ browserCount + "'>\n");
-				writer.append("<table class='details' >\n");
-
-				for (String scenario : results.getScenarios(clazz)) {
-					writer.append("<tr>\n");
-					writer.append("<td class='scenario' colspan='50' >\n");
-					writer.append(scenario + "\n");
-					writer.append("</td>\n");
-					writer.append("</tr>\n");
-					
-					for (String data : results.getData(clazz, scenario)) {
-						writer.append("<tr>\n");
-						writer.append("<td class='details' >\n");
-						writer.append(data + "\n");
-						writer.append("</td>\n");
-						for (String browser : browsers) {
-							writer.append("<td>\n");
-							writer.append(results.getExecutionResults(clazz, scenario,
-									data, browser, feature) + "\n");
-							writer.append("</td>\n");
-						}
-						writer.append("</tr>\n");
-					}
-				}
-
-				writer.append("</table>\n");
-				writer.append("    </td></tr>\n");
-			}
-
-			writer.append("  </table>\n");
-			writer.append("</body>");
-
-			out.close();
+			fileWriter = new FileWriter(new File(
+					"target/executions/dashboard.html"));
+			template.process(input, fileWriter);
+			fileWriter.close();
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TemplateException e) {
 			e.printStackTrace();
 		}
 	}

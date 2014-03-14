@@ -4,8 +4,15 @@
 	<parent>
 		<groupId>es.bull.testingframework</groupId>
 		<artifactId>cucumberOnSelenium</artifactId>
-		<version>1.01</version>		
+		<version>1.01</version>
 	</parent>
 	<artifactId>core</artifactId>
-	<packaging>jar</packaging>	
+	<packaging>jar</packaging>
+	<dependencies>
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>2.3.20</version>
+		</dependency>
+	</dependencies>
 </project>

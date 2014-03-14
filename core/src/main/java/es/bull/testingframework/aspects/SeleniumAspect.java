@@ -1,21 +1,28 @@
 package es.bull.testingframework.aspects;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import es.bull.testingframework.ThreadProperty;
@@ -62,6 +69,94 @@ public class SeleniumAspect {
 		return newEx;
 	}
 
+	private Integer getDocumentHeight(WebDriver driver) {
+		WebElement body = driver.findElement(By.tagName("html"));
+		return body.getSize().getHeight();
+	}
+
+	private File adjustLastCapture(Integer newTrailingImageHeight,
+			ArrayList<File> capture) throws IOException {
+		// cuts last image just in case it dupes information
+		Integer finalHeight = 0;
+		Integer finalWidth = 0;
+
+		File trailingImage = capture.get(capture.size() - 1);
+		capture.remove(capture.size() - 1);
+
+		BufferedImage oldTrailingImage = ImageIO.read(trailingImage);
+		BufferedImage newTrailingImage = new BufferedImage(
+				oldTrailingImage.getWidth(), oldTrailingImage.getHeight()
+						- newTrailingImageHeight, BufferedImage.TYPE_INT_RGB);
+
+		newTrailingImage.createGraphics().drawImage(oldTrailingImage, 0,
+				0 - newTrailingImageHeight, null);
+
+		File newTrailingImageF = File.createTempFile("tmpnewTrailingImage",
+				".png");
+		newTrailingImageF.deleteOnExit();
+
+		ImageIO.write(newTrailingImage, "png", newTrailingImageF);
+
+		capture.add(newTrailingImageF);
+
+		finalWidth = ImageIO.read(capture.get(0)).getWidth();
+		for (File cap : capture) {
+			finalHeight += ImageIO.read(cap).getHeight();
+		}
+
+		BufferedImage img = new BufferedImage(finalWidth, finalHeight,
+				BufferedImage.TYPE_INT_RGB);
+
+		Integer y = 0;
+		BufferedImage tmpImg = null;
+		for (File cap : capture) {
+			tmpImg = ImageIO.read(cap);
+			img.createGraphics().drawImage(tmpImg, 0, y, null);
+			y += tmpImg.getHeight();
+		}
+
+		long ts = System.currentTimeMillis() / 1000L;
+
+		File temp;
+
+		temp = File.createTempFile("chromecap" + String.valueOf(ts), ".png");
+		temp.deleteOnExit();
+		ImageIO.write(img, "png", temp);
+
+		return temp;
+	}
+
+	private File chromeFullScreenCapture(WebDriver driver) throws IOException, InterruptedException {
+		// scroll loop n times to get the whole page if browser is chrome
+		ArrayList<File> capture = new ArrayList<File>();
+
+		Boolean atBottom = false;
+		((RemoteWebDriver) driver).manage().window().maximize();
+		Integer windowSize = ((Long) ((JavascriptExecutor) driver)
+				.executeScript("return document.documentElement.clientHeight"))
+				.intValue();
+		System.out.println(windowSize);
+
+		Integer accuScroll = 0;
+		Integer newTrailingImageHeight = 0;
+
+		while (!atBottom) {
+			Thread.sleep(1500);
+			capture.add(((TakesScreenshot) driver)
+					.getScreenshotAs(OutputType.FILE));
+
+			((JavascriptExecutor) driver).executeScript("if(window.screen)"
+					+ " {window.scrollBy(0," + windowSize + ");};");
+
+			accuScroll += windowSize;
+			if (getDocumentHeight(driver) <= accuScroll) {
+				atBottom = true;
+			}
+		}
+		newTrailingImageHeight = accuScroll - getDocumentHeight(driver);
+		return adjustLastCapture(newTrailingImageHeight, capture);
+	}
+
 	private String captureEvidence(ProceedingJoinPoint pjp, String type)
 			throws Exception {
 
@@ -86,8 +181,14 @@ public class SeleniumAspect {
 
 		if (type.equals("screenCapture")) {
 			outputFile = outputFile + ".png";
-			File file = ((TakesScreenshot) driver)
-					.getScreenshotAs(OutputType.FILE);
+			File file = null;
+			
+			if (currentBrowser.startsWith("chrome")) {
+				file = chromeFullScreenCapture(driver);
+			} else {
+				file = ((TakesScreenshot) driver)
+						.getScreenshotAs(OutputType.FILE);
+			}
 			try {
 				FileUtils.copyFile(file, new File(outputFile));
 			} catch (IOException e) {

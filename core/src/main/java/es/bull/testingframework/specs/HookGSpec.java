@@ -73,8 +73,6 @@ public class HookGSpec extends BaseSpec {
 		// FIXME: shamefully hardcoded
 		commonspec.getDriver().manage().window()
 				.setSize(new Dimension(1366, 768));
-
-		commonspec.setDriver(new Augmenter().augment(commonspec.getDriver()));
 	}
 
 	@After

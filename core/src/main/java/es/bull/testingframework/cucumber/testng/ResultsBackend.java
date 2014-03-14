@@ -168,7 +168,8 @@ public class ResultsBackend {
 
 		for (ScenarioResult resultdata : sResult) {
 			if ((resultdata.getClazz().equals(clazz))
-					&& (resultdata.getScenario().equals(scenario))) {
+					&& (resultdata.getScenario().equals(scenario))
+					&& !(datas.contains(resultdata.getData()))) {
 				datas.add(resultdata.getData());
 			}
 		}
