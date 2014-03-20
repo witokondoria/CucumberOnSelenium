@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -212,6 +213,18 @@ public class ExecutiveResultsReporter extends TestListenerAdapter {
 		}
 	}
 
+	private boolean isGroupOnRunMethods(String group, ITestNGMethod[] methods) {
+
+		for (ITestNGMethod method : methods) {
+			for (String gr : Arrays.asList(method.getGroups())) {
+				if (group.equals(gr)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public void onFinish(ITestContext context) {
 		Configuration cfg = new Configuration();
@@ -230,15 +243,15 @@ public class ExecutiveResultsReporter extends TestListenerAdapter {
 		Map<String, Object> input = new HashMap<String, Object>();
 
 		List<Group> groupsF = new ArrayList<Group>();
+		int hsl = 0;
 		for (String group : context.getIncludedGroups()) {
-			Random rand = new Random();
-			String hsl = ((int) (rand.nextInt(24) + 4) * 12) + ", 90%, 50%";
-			Group groupDef = new Group(group, hsl);
-			while (groupsF.contains(groupDef)) {
-				hsl = ((int) (rand.nextInt(24) + 4) * 12) + ", 90%, 50%";
-				groupDef = new Group(group, hsl);
+			ITestNGMethod[] methods = context.getAllTestMethods();
+			if (isGroupOnRunMethods(group, methods)) {
+				hsl = hsl + 40;
+				Group groupDef = new Group(group, Integer.toString(hsl)
+						+ ", 90%, 50%");
+				groupsF.add(groupDef);
 			}
-			groupsF.add(groupDef);
 		}
 		input.put("groups", groupsF);
 

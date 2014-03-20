@@ -142,7 +142,7 @@ class CucumberReporter implements Formatter, Reporter {
 	public void endOfScenarioLifeCycle(Scenario scenario) {
 		testMethod.finish(document, root, position);
 		position++;
-		if (iteration >= tmpExamples.getRows().size()) {
+		if ((tmpExamples != null) && (iteration >= tmpExamples.getRows().size())) {
 			tmpExamples = null;
 		}
 		tmpHooks.clear();

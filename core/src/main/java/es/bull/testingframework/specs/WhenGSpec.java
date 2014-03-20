@@ -9,6 +9,8 @@ import org.openqa.selenium.internal.Locatable;
 
 import cucumber.api.java.en.When;
 import cucumber.api.java.es.Cuando;
+import es.bull.testingframework.cucumber.annotation.Parameter;
+import es.bull.testingframework.cucumber.annotation.Parameters;
 
 public class WhenGSpec extends BaseSpec {
 
@@ -47,6 +49,7 @@ public class WhenGSpec extends BaseSpec {
 		}
 	}
 
+	@Parameters({ @Parameter(name = Parameter.Name.TEXT, type = Parameter.Type.STRING) })
 	@When("^I type '(.*?)' at this element$")
 	@Cuando("^escribo el texto '(.*?)' en ese elemento$")
 	public void typeToElement(String keys) {
@@ -58,15 +61,19 @@ public class WhenGSpec extends BaseSpec {
 		elem.sendKeys(keys);
 	}
 
-	@When("^I click on this element$")
-	@Cuando("^hago click en ese elemento$")
-	public void clickElement() {
-		commonspec.getLogger().info(
-				"{}: Clicking on the first previous found element",
+	@Parameters({ @Parameter(name = Parameter.Name.SECONDS, type = Parameter.Type.INT) })
+	@When("^I click on th(?:is|ese) elements?, waiting '(\\d+)' seconds$")
+	@Cuando("^hago click en es(?:e|os) elementos?, con esperas de '(\\d+)' segundos$")
+	public void clickElement(Integer wait) throws InterruptedException {
+		commonspec.getLogger().info("{}: Clicking work",
 				commonspec.getShortBrowser());
 
-		WebElement elem = commonspec.getCurrentElements().get(0);
-		elem.click();
+		List<WebElement> elems = commonspec.getCurrentElements();
+		for (WebElement elem : elems) {
+			((Locatable) elem).getCoordinates().inViewPort();
+			elem.click();
+			Thread.sleep(wait * 1000);
+		}
 	}
 
 	@When("^I wipe the text at this element$")
@@ -93,6 +100,7 @@ public class WhenGSpec extends BaseSpec {
 
 	}
 
+	@Parameters({ @Parameter(name = Parameter.Name.SECONDS, type = Parameter.Type.INT) })
 	@When("^I wait '(\\d+)' seconds?$")
 	@Cuando("^espero '(\\d+)' segundos?$")
 	public void explicitWait(Integer time) throws InterruptedException {

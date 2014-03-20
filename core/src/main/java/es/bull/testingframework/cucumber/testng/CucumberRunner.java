@@ -38,7 +38,7 @@ public class CucumberRunner {
 		CucumberReporter reporter = new CucumberReporter(
 				Utils.toURL("target/executions/" + clazz.getCanonicalName()
 						+ "-" + browser + ".xml"));
-		runtimeOptions.getFormatters().add(reporter);
+		runtimeOptions.addFormatter(reporter);
 		ClassFinder classFinder = new ResourceLoaderClassFinder(resourceLoader,
 				classLoader);
 		runtime = new cucumber.runtime.Runtime(resourceLoader, classFinder,

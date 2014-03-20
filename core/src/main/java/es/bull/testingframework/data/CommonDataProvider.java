@@ -53,6 +53,9 @@ public class CommonDataProvider {
 						Matcher m = pat.matcher(browserDetails.attr("title"));
 						while (m.find()) {
 							response.add(m.group(1) + "_" + m.group(3));
+							if (m.group(1).toLowerCase().contains("chrome")) {
+								response.add("droidemu_" + m.group(3));
+							}
 						}
 					} else {
 						String version = busyBrowserList.get(iBusy).parent()
@@ -68,6 +71,9 @@ public class CommonDataProvider {
 									browserSrc.length() - 4);
 						}
 						response.add(browser + "_" + version);
+						if (browser.toLowerCase().contains("chrome")) {
+							response.add("droidemu_" + version);
+						}
 						iBusy++;
 					}
 				}
@@ -106,6 +112,9 @@ public class CommonDataProvider {
 			Matcher m = pat.matcher(slave.ownText());
 			while (m.find()) {
 				response.add(m.group(1) + "_" + m.group(3));
+				if (m.group(1).toLowerCase().contains("chrome")) {
+					response.add("droidemu_" + m.group(3));
+				}
 			}
 		}
 
@@ -130,7 +139,7 @@ public class CommonDataProvider {
 			results.setContext("");
 		} else {
 			// FIXME: parse context from seleniumOnJenkins variable
-			if (seleniumOnJenkins.contains("localhost")) { 
+			if (seleniumOnJenkins.contains("localhost")) {
 				results.setContext("");
 			} else {
 				results.setContext("/jenkins");

@@ -18,11 +18,13 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import es.bull.testingframework.ThreadProperty;
@@ -131,12 +133,10 @@ public class SeleniumAspect {
 		ArrayList<File> capture = new ArrayList<File>();
 
 		Boolean atBottom = false;
-		((RemoteWebDriver) driver).manage().window().maximize();
 		Integer windowSize = ((Long) ((JavascriptExecutor) driver)
 				.executeScript("return document.documentElement.clientHeight"))
 				.intValue();
-		System.out.println(windowSize);
-
+		
 		Integer accuScroll = 0;
 		Integer newTrailingImageHeight = 0;
 
@@ -184,6 +184,9 @@ public class SeleniumAspect {
 			File file = null;
 			
 			if (currentBrowser.startsWith("chrome")) {
+				Actions actions = new Actions(driver);
+				actions.keyDown(Keys.CONTROL).sendKeys(Keys.HOME).perform();
+				
 				file = chromeFullScreenCapture(driver);
 			} else {
 				file = ((TakesScreenshot) driver)

@@ -117,9 +117,9 @@ public class CommonSpec {
 	public List<WebElement> locateElements(WebElement parent, String tag,
 			String attrib, String value) {
 		List<WebElement> elems = null;
-		String attribValue = "[@=" + attrib + "'" + value + "']";
+		String attribValue = "[@" + attrib + "='" + value + "']";
 
-		this.getLogger().info("{}: Locating elements", this.getShortBrowser());
+		this.getLogger().info("{}: Locating elements {}-{}", this.getShortBrowser(), tag, attribValue);
 		if (attrib.equals("")) {
 			elems = parent.findElements(By.xpath(".//" + tag));
 		} else {

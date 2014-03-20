@@ -22,7 +22,7 @@ public class CucumberNPEBugAspect {
 		}
 	}
 
-	@Pointcut("call(* cucumber.runtime.xstream.LocalizedXStreams.LocalizedXStream.setParameterType(..))")
+	@Pointcut("call(* cucumber.runtime.xstream.LocalizedXStreams.LocalizedXStream.setParameterInfo(..))")
 	protected void setParameterTypePointcut() {
 	}
 

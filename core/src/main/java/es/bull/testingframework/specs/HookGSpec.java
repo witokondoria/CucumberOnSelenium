@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Proxy;
-import org.openqa.selenium.remote.Augmenter;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -16,7 +16,6 @@ import com.thoughtworks.selenium.SeleniumException;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import es.bull.testingframework.ThreadProperty;
-import es.bull.testingframework.specs.CommonSpec;
 
 public class HookGSpec extends BaseSpec {
 
@@ -41,7 +40,19 @@ public class HookGSpec extends BaseSpec {
 
 		DesiredCapabilities capabilities = null;
 
-		if (browserType.toLowerCase().equals("chrome")) {
+		if (browserType.toLowerCase().equals("droidemu")) {
+			capabilities = DesiredCapabilities.chrome();
+			ChromeOptions chromeOptions = new ChromeOptions();
+			chromeOptions.addArguments("disable-plugins");
+			chromeOptions.addArguments("use-mobile-user-agent");
+			chromeOptions.addArguments("app=http://rtve.es/api/blank");
+			chromeOptions.addArguments("app-window-size=1000,700");
+			chromeOptions
+					.addArguments("user-agent=\"Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 4 Build/JOP40D) "
+							+ "AppleWebKit/535.19 (KHTML, like Gecko) "
+							+ "Chrome/18.0.1025.166 Mobile Safari/535.19\")\"");
+			capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
+		} else if (browserType.toLowerCase().equals("chrome")) {
 			capabilities = DesiredCapabilities.chrome();
 		} else if (browserType.toLowerCase().equals("firefox")) {
 			capabilities = DesiredCapabilities.firefox();
@@ -70,9 +81,13 @@ public class HookGSpec extends BaseSpec {
 		commonspec.getDriver().manage().timeouts()
 				.setScriptTimeout(30, TimeUnit.SECONDS);
 
+		commonspec.getDriver().manage().deleteAllCookies();
+
 		// FIXME: shamefully hardcoded
-		commonspec.getDriver().manage().window()
-				.setSize(new Dimension(1366, 768));
+		if (!browserType.toLowerCase().equals("droidemu")) {
+			commonspec.getDriver().manage().window()
+					.setSize(new Dimension(1366, 768));
+		}
 	}
 
 	@After
